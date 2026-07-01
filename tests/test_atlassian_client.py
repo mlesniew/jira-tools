@@ -1,5 +1,7 @@
+import pytest
 import responses
 from pydantic import SecretStr
+from requests.exceptions import HTTPError
 
 from jira_tools.atlassian_client import ReadOnlyConfluenceClient, ReadOnlyJiraClient
 from jira_tools.config import AtlassianConfig
@@ -48,12 +50,8 @@ def test_confluence_whoami_returns_display_name() -> None:
 def test_jira_whoami_raises_on_unauthorized() -> None:
     responses.add(responses.GET, JIRA_MYSELF_URL, json={"message": "Unauthorized"}, status=401)
 
-    try:
+    with pytest.raises(HTTPError):
         ReadOnlyJiraClient(_config()).whoami()
-    except Exception:
-        pass
-    else:
-        raise AssertionError("expected whoami() to raise on a 401 response")
 
 
 @responses.activate
@@ -62,12 +60,8 @@ def test_confluence_whoami_raises_on_unauthorized() -> None:
         responses.GET, CONFLUENCE_CURRENT_USER_URL, json={"message": "Unauthorized"}, status=401
     )
 
-    try:
+    with pytest.raises(HTTPError):
         ReadOnlyConfluenceClient(_config()).whoami()
-    except Exception:
-        pass
-    else:
-        raise AssertionError("expected whoami() to raise on a 401 response")
 
 
 def test_wrapper_classes_expose_no_write_implying_method() -> None:

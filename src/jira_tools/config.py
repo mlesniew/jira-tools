@@ -7,7 +7,6 @@ import stat
 import tomllib
 from pathlib import Path
 
-import typer
 from pydantic import BaseModel, SecretStr, ValidationError
 
 REQUIRED_FIELDS = ("site_url", "email", "api_token")
@@ -56,8 +55,6 @@ def load_config(path: Path | None = None) -> AtlassianConfig:
     if not resolved_path.is_file():
         raise ConfigNotFoundError(resolved_path)
 
-    _warn_if_permissive(resolved_path)
-
     try:
         raw = tomllib.loads(resolved_path.read_text())
     except tomllib.TOMLDecodeError as exc:
@@ -69,13 +66,12 @@ def load_config(path: Path | None = None) -> AtlassianConfig:
         fields = ", ".join(sorted({str(error["loc"][0]) for error in exc.errors()}))
         raise ConfigInvalidError(
             resolved_path, f"missing or invalid field(s): {fields}"
-        ) from exc
+        ) from None
 
 
-def _warn_if_permissive(path: Path) -> None:
+def permission_warning(path: Path) -> str | None:
+    """Return a warning message if the config file is group/other readable, else None."""
     mode = path.stat().st_mode
     if mode & (stat.S_IRWXG | stat.S_IRWXO):
-        typer.echo(
-            f"Warning: {path} is readable by group/other; run `chmod 600 {path}`.",
-            err=True,
-        )
+        return f"Warning: {path} is readable by group/other; run `chmod 600 {path}`."
+    return None

@@ -7,7 +7,7 @@ from jira_tools.atlassian_client import (
     ReadOnlyConfluenceClient,
     ReadOnlyJiraClient,
 )
-from jira_tools.config import ConfigError, load_config
+from jira_tools.config import ConfigError, config_path, load_config, permission_warning
 
 app = typer.Typer(
     name="jira-tools",
@@ -27,8 +27,11 @@ def version() -> None:
 @app.command(name="auth-check")
 def auth_check() -> None:
     """Confirm Jira and Confluence Cloud credentials work, without printing the token."""
+    path = config_path()
     try:
-        config = load_config()
+        if path.is_file() and (warning := permission_warning(path)):
+            typer.echo(warning, err=True)
+        config = load_config(path)
     except ConfigError as exc:
         typer.echo(str(exc), err=True)
         raise typer.Exit(code=1) from exc

@@ -2,7 +2,12 @@ from pathlib import Path
 
 import pytest
 
-from jira_tools.config import ConfigInvalidError, ConfigNotFoundError, load_config
+from jira_tools.config import (
+    ConfigInvalidError,
+    ConfigNotFoundError,
+    load_config,
+    permission_warning,
+)
 
 VALID_TOML = """
 site_url = "https://example.atlassian.net"
@@ -59,27 +64,20 @@ def test_load_config_missing_field_names_it(tmp_path: Path) -> None:
     assert "api_token" in str(exc_info.value)
 
 
-def test_load_config_warns_on_world_readable(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_permission_warning_on_world_readable(tmp_path: Path) -> None:
     config_file = _write_config(tmp_path, VALID_TOML, mode=0o644)
 
-    load_config(config_file)
+    warning = permission_warning(config_file)
 
-    captured = capsys.readouterr()
-    assert "Warning" in captured.err
-    assert str(config_file) in captured.err
+    assert warning is not None
+    assert "Warning" in warning
+    assert str(config_file) in warning
 
 
-def test_load_config_no_warning_on_owner_only(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_permission_warning_none_on_owner_only(tmp_path: Path) -> None:
     config_file = _write_config(tmp_path, VALID_TOML, mode=0o600)
 
-    load_config(config_file)
-
-    captured = capsys.readouterr()
-    assert captured.err == ""
+    assert permission_warning(config_file) is None
 
 
 def test_load_config_does_not_leak_token_in_repr(tmp_path: Path) -> None:
