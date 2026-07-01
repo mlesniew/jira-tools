@@ -92,15 +92,41 @@ def test_auth_check_missing_config_names_expected_path(
     assert "jira-tools/config.toml" in result.stderr
 
 
+@pytest.mark.parametrize(
+    "jira_status,confluence_status",
+    [(200, 200), (401, 200), (401, 401)],
+    ids=["both-pass", "jira-fails", "both-fail"],
+)
 @responses.activate
 def test_auth_check_never_leaks_token(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, jira_status: int, confluence_status: int
 ) -> None:
     _write_config(tmp_path, monkeypatch)
-    responses.add(responses.GET, JIRA_MYSELF_URL, json={"message": "Unauthorized"}, status=401)
     responses.add(
-        responses.GET, CONFLUENCE_CURRENT_USER_URL, json={"message": "Unauthorized"}, status=401
+        responses.GET,
+        JIRA_MYSELF_URL,
+        json={"displayName": "Jane Doe"} if jira_status == 200 else {"message": "Unauthorized"},
+        status=jira_status,
     )
+    responses.add(
+        responses.GET,
+        CONFLUENCE_CURRENT_USER_URL,
+        json={"displayName": "Jane Doe"}
+        if confluence_status == 200
+        else {"message": "Unauthorized"},
+        status=confluence_status,
+    )
+
+    result = runner.invoke(app, ["auth-check"])
+
+    assert "s3cr3t-token" not in result.stdout
+    assert "s3cr3t-token" not in result.stderr
+
+
+def test_auth_check_never_leaks_token_on_missing_config(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
 
     result = runner.invoke(app, ["auth-check"])
 

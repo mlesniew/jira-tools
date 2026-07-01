@@ -415,25 +415,25 @@ Not applicable — no existing credential storage or config to migrate from.
 
 #### Automated
 
-- [x] 3.1 Type checking passes: `uv run mypy`
-- [x] 3.2 Linting passes: `uv run ruff check .`
-- [x] 3.3 Unit tests pass: `uv run pytest tests/test_cli.py`
+- [x] 3.1 Type checking passes: `uv run mypy` — 7f7413c
+- [x] 3.2 Linting passes: `uv run ruff check .` — 7f7413c
+- [x] 3.3 Unit tests pass: `uv run pytest tests/test_cli.py` — 7f7413c
 
 #### Manual
 
-- [x] 3.4 `--help` shows clear command description
-- [x] 3.5 Valid credentials print PASS for both products
-- [x] 3.6 Invalid credentials print FAIL for both with no token leakage
+- [x] 3.4 `--help` shows clear command description — 7f7413c
+- [x] 3.5 Valid credentials print PASS for both products — 7f7413c
+- [x] 3.6 Invalid credentials print FAIL for both with no token leakage — 7f7413c
 
 ### Phase 4: Testing & Secret-Safety Verification
 
 #### Automated
 
-- [ ] 4.1 Type checking passes: `uv run mypy`
-- [ ] 4.2 Linting passes: `uv run ruff check .`
-- [ ] 4.3 Full test suite passes: `uv run pytest`
+- [x] 4.1 Type checking passes: `uv run mypy`
+- [x] 4.2 Linting passes: `uv run ruff check .`
+- [x] 4.3 Full test suite passes: `uv run pytest`
 
 #### Manual
 
-- [ ] 4.4 An unfamiliar developer can follow the README alone to reach a
+- [x] 4.4 An unfamiliar developer can follow the README alone to reach a
       passing `auth-check`
