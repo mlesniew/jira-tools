@@ -389,27 +389,27 @@ Not applicable — no existing credential storage or config to migrate from.
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `uv run mypy`
-- [x] 1.2 Linting passes: `uv run ruff check .`
-- [x] 1.3 Unit tests pass: `uv run pytest tests/test_config.py`
+- [x] 1.1 Type checking passes: `uv run mypy` — 0a63758
+- [x] 1.2 Linting passes: `uv run ruff check .` — 0a63758
+- [x] 1.3 Unit tests pass: `uv run pytest tests/test_config.py` — 0a63758
 
 #### Manual
 
-- [x] 1.4 Valid config file loads without error
-- [x] 1.5 Missing config file produces actionable message naming expected path
-- [x] 1.6 Permission warning appears for 644, absent for 600
+- [x] 1.4 Valid config file loads without error — 0a63758
+- [x] 1.5 Missing config file produces actionable message naming expected path — 0a63758
+- [x] 1.6 Permission warning appears for 644, absent for 600 — 0a63758
 
 ### Phase 2: Read-only Atlassian Client Wrapper
 
 #### Automated
 
-- [ ] 2.1 Type checking passes: `uv run mypy`
-- [ ] 2.2 Linting passes: `uv run ruff check .`
-- [ ] 2.3 Unit tests pass: `uv run pytest tests/test_atlassian_client.py`
+- [x] 2.1 Type checking passes: `uv run mypy`
+- [x] 2.2 Linting passes: `uv run ruff check .`
+- [x] 2.3 Unit tests pass: `uv run pytest tests/test_atlassian_client.py`
 
 #### Manual
 
-- [ ] 2.4 Wrapper module's public API exposes no write-implying method
+- [x] 2.4 Wrapper module's public API exposes no write-implying method
 
 ### Phase 3: `auth-check` CLI Command
 

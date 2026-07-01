@@ -8,6 +8,7 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "atlassian-python-api>=4.0.7",
     "pydantic>=2.13.4",
     "typer>=0.26.8",
 ]
@@ -23,6 +24,7 @@ build-backend = "uv_build"
 dev = [
     "mypy>=2.1.0",
     "pytest>=9.1.1",
+    "responses>=0.26.1",
     "ruff>=0.15.20",
 ]
 
