@@ -429,11 +429,11 @@ Not applicable — no existing credential storage or config to migrate from.
 
 #### Automated
 
-- [x] 4.1 Type checking passes: `uv run mypy`
-- [x] 4.2 Linting passes: `uv run ruff check .`
-- [x] 4.3 Full test suite passes: `uv run pytest`
+- [x] 4.1 Type checking passes: `uv run mypy` — d9f19c6
+- [x] 4.2 Linting passes: `uv run ruff check .` — d9f19c6
+- [x] 4.3 Full test suite passes: `uv run pytest` — d9f19c6
 
 #### Manual
 
 - [x] 4.4 An unfamiliar developer can follow the README alone to reach a
-      passing `auth-check`
+      passing `auth-check` — d9f19c6

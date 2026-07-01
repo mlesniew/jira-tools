@@ -1,7 +1,7 @@
 ---
 change_id: atlassian-readonly-auth
 title: Read-only Atlassian auth wired
-status: implementing
+status: implemented
 created: 2026-07-01
 updated: 2026-07-01
 archived_at: null
