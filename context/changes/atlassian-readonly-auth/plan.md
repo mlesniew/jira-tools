@@ -403,27 +403,27 @@ Not applicable — no existing credential storage or config to migrate from.
 
 #### Automated
 
-- [x] 2.1 Type checking passes: `uv run mypy`
-- [x] 2.2 Linting passes: `uv run ruff check .`
-- [x] 2.3 Unit tests pass: `uv run pytest tests/test_atlassian_client.py`
+- [x] 2.1 Type checking passes: `uv run mypy` — 67c49a3
+- [x] 2.2 Linting passes: `uv run ruff check .` — 67c49a3
+- [x] 2.3 Unit tests pass: `uv run pytest tests/test_atlassian_client.py` — 67c49a3
 
 #### Manual
 
-- [x] 2.4 Wrapper module's public API exposes no write-implying method
+- [x] 2.4 Wrapper module's public API exposes no write-implying method — 67c49a3
 
 ### Phase 3: `auth-check` CLI Command
 
 #### Automated
 
-- [ ] 3.1 Type checking passes: `uv run mypy`
-- [ ] 3.2 Linting passes: `uv run ruff check .`
-- [ ] 3.3 Unit tests pass: `uv run pytest tests/test_cli.py`
+- [x] 3.1 Type checking passes: `uv run mypy`
+- [x] 3.2 Linting passes: `uv run ruff check .`
+- [x] 3.3 Unit tests pass: `uv run pytest tests/test_cli.py`
 
 #### Manual
 
-- [ ] 3.4 `--help` shows clear command description
-- [ ] 3.5 Valid credentials print PASS for both products
-- [ ] 3.6 Invalid credentials print FAIL for both with no token leakage
+- [x] 3.4 `--help` shows clear command description
+- [x] 3.5 Valid credentials print PASS for both products
+- [x] 3.6 Invalid credentials print FAIL for both with no token leakage
 
 ### Phase 4: Testing & Secret-Safety Verification
 

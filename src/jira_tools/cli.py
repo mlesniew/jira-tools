@@ -1,4 +1,13 @@
+from collections.abc import Callable
+
 import typer
+
+from jira_tools.atlassian_client import (
+    IdentityCheckResult,
+    ReadOnlyConfluenceClient,
+    ReadOnlyJiraClient,
+)
+from jira_tools.config import ConfigError, load_config
 
 app = typer.Typer(
     name="jira-tools",
@@ -13,3 +22,29 @@ def version() -> None:
     from importlib.metadata import version as pkg_version
 
     typer.echo(pkg_version("jira-tools"))
+
+
+@app.command(name="auth-check")
+def auth_check() -> None:
+    """Confirm Jira and Confluence Cloud credentials work, without printing the token."""
+    try:
+        config = load_config()
+    except ConfigError as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(code=1) from exc
+
+    jira_ok = _report("Jira", lambda: ReadOnlyJiraClient(config).whoami())
+    confluence_ok = _report("Confluence", lambda: ReadOnlyConfluenceClient(config).whoami())
+
+    if not (jira_ok and confluence_ok):
+        raise typer.Exit(code=1)
+
+
+def _report(product: str, whoami: Callable[[], IdentityCheckResult]) -> bool:
+    try:
+        result = whoami()
+    except Exception as exc:
+        typer.echo(f"{product}: FAIL ({exc})")
+        return False
+    typer.echo(f"{product}: PASS (as {result.display_name})")
+    return True
