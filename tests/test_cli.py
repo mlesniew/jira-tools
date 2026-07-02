@@ -10,6 +10,13 @@ runner = CliRunner()
 
 JIRA_MYSELF_URL = "https://example.atlassian.net/rest/api/2/myself"
 CONFLUENCE_CURRENT_USER_URL = "https://example.atlassian.net/wiki/rest/api/user/current"
+JIRA_ISSUE_URL = "https://example.atlassian.net/rest/api/2/issue/PROJ-1"
+JIRA_COMMENTS_URL = "https://example.atlassian.net/rest/api/2/issue/PROJ-1/comment"
+
+_ADF_TEXT_DOC = {
+    "type": "doc",
+    "content": [{"type": "paragraph", "content": [{"type": "text", "text": "hello"}]}],
+}
 
 VALID_TOML = """
 site_url = "https://example.atlassian.net"
@@ -139,3 +146,108 @@ def test_auth_check_help_shows_description() -> None:
 
     assert result.exit_code == 0
     assert "Confirm Jira and Confluence Cloud credentials work" in result.stdout
+
+
+@responses.activate
+def test_fetch_ticket_prints_markdown_document(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_config(tmp_path, monkeypatch)
+    responses.add(
+        responses.GET,
+        JIRA_ISSUE_URL,
+        json={
+            "key": "PROJ-1",
+            "fields": {
+                "summary": "Something is broken",
+                "status": {"name": "In Progress"},
+                "issuetype": {"name": "Bug"},
+                "description": _ADF_TEXT_DOC,
+            },
+        },
+        status=200,
+    )
+    responses.add(
+        responses.GET,
+        JIRA_COMMENTS_URL,
+        json={
+            "startAt": 0,
+            "maxResults": 50,
+            "total": 1,
+            "comments": [
+                {
+                    "id": "10000",
+                    "author": {"displayName": "Jane Doe"},
+                    "created": "2026-01-01T00:00:00.000+0000",
+                    "body": _ADF_TEXT_DOC,
+                }
+            ],
+        },
+        status=200,
+    )
+
+    result = runner.invoke(app, ["fetch-ticket", "PROJ-1"])
+
+    assert result.exit_code == 0
+    assert "# Something is broken" in result.stdout
+    assert "PROJ-1" in result.stdout
+    assert "### Comment by Jane Doe" in result.stdout
+
+
+@responses.activate
+def test_fetch_ticket_fails_cleanly_on_not_found(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_config(tmp_path, monkeypatch)
+    responses.add(responses.GET, JIRA_ISSUE_URL, json={"message": "Not Found"}, status=404)
+
+    result = runner.invoke(app, ["fetch-ticket", "PROJ-1"])
+
+    assert result.exit_code != 0
+    assert "PROJ-1" in result.stderr
+    assert "Traceback" not in result.stderr
+
+
+@responses.activate
+def test_fetch_ticket_never_leaks_token_on_success(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_config(tmp_path, monkeypatch)
+    responses.add(
+        responses.GET,
+        JIRA_ISSUE_URL,
+        json={
+            "key": "PROJ-1",
+            "fields": {
+                "summary": "Something is broken",
+                "status": {"name": "In Progress"},
+                "issuetype": {"name": "Bug"},
+                "description": None,
+            },
+        },
+        status=200,
+    )
+    responses.add(
+        responses.GET,
+        JIRA_COMMENTS_URL,
+        json={"startAt": 0, "maxResults": 50, "total": 0, "comments": []},
+        status=200,
+    )
+
+    result = runner.invoke(app, ["fetch-ticket", "PROJ-1"])
+
+    assert "s3cr3t-token" not in result.stdout
+    assert "s3cr3t-token" not in result.stderr
+
+
+@responses.activate
+def test_fetch_ticket_never_leaks_token_on_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_config(tmp_path, monkeypatch)
+    responses.add(responses.GET, JIRA_ISSUE_URL, json={"message": "Not Found"}, status=404)
+
+    result = runner.invoke(app, ["fetch-ticket", "PROJ-1"])
+
+    assert "s3cr3t-token" not in result.stdout
+    assert "s3cr3t-token" not in result.stderr

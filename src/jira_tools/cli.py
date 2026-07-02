@@ -1,6 +1,7 @@
 from collections.abc import Callable
 
 import typer
+from requests.exceptions import HTTPError
 
 from jira_tools.atlassian_client import (
     IdentityCheckResult,
@@ -8,6 +9,7 @@ from jira_tools.atlassian_client import (
     ReadOnlyJiraClient,
 )
 from jira_tools.config import ConfigError, config_path, load_config, permission_warning
+from jira_tools.ticket_document import build_ticket_document
 
 app = typer.Typer(
     name="jira-tools",
@@ -41,6 +43,27 @@ def auth_check() -> None:
 
     if not (jira_ok and confluence_ok):
         raise typer.Exit(code=1)
+
+
+@app.command(name="fetch-ticket")
+def fetch_ticket(key: str) -> None:
+    """Fetch a Jira ticket and print it as Markdown."""
+    path = config_path()
+    try:
+        if path.is_file() and (warning := permission_warning(path)):
+            typer.echo(warning, err=True)
+        config = load_config(path)
+    except ConfigError as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(code=1) from exc
+
+    try:
+        ticket = ReadOnlyJiraClient(config).get_ticket(key)
+    except HTTPError:
+        typer.echo(f"Could not fetch ticket {key}: not found or not accessible.", err=True)
+        raise typer.Exit(code=1) from None
+
+    typer.echo(build_ticket_document(ticket))
 
 
 def _report(product: str, whoami: Callable[[], IdentityCheckResult]) -> bool:

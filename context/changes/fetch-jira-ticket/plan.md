@@ -402,9 +402,9 @@ Not applicable — purely additive; no existing data or behavior changes.
 
 #### Automated
 
-- [x] 2.1 Unit tests pass: `uv run pytest tests/test_atlassian_client.py` (incl. multi-page comment pagination and HTTPError propagation)
-- [x] 2.2 Type checking passes: `uv run mypy`
-- [x] 2.3 Linting passes: `uv run ruff check .`
+- [x] 2.1 Unit tests pass: `uv run pytest tests/test_atlassian_client.py` (incl. multi-page comment pagination and HTTPError propagation) — 564be16
+- [x] 2.2 Type checking passes: `uv run mypy` — 564be16
+- [x] 2.3 Linting passes: `uv run ruff check .` — 564be16
 
 #### Manual
 
@@ -414,10 +414,10 @@ Not applicable — purely additive; no existing data or behavior changes.
 
 #### Automated
 
-- [ ] 3.1 Unit tests pass: `uv run pytest tests/test_ticket_document.py`
-- [ ] 3.2 CLI tests pass: `uv run pytest tests/test_cli.py` (success + 404/403 failure cases)
-- [ ] 3.3 Token-leakage test confirms no credential in `fetch-ticket` output on success or failure
-- [ ] 3.4 Full suite green: `uv run ruff check .`, `uv run mypy`, `uv run pytest`
+- [x] 3.1 Unit tests pass: `uv run pytest tests/test_ticket_document.py`
+- [x] 3.2 CLI tests pass: `uv run pytest tests/test_cli.py` (success + 404/403 failure cases)
+- [x] 3.3 Token-leakage test confirms no credential in `fetch-ticket` output on success or failure
+- [x] 3.4 Full suite green: `uv run ruff check .`, `uv run mypy`, `uv run pytest`
 
 #### Manual
 
