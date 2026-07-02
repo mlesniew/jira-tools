@@ -8,8 +8,8 @@ from jira_tools.config import AtlassianConfig
 
 JIRA_MYSELF_URL = "https://example.atlassian.net/rest/api/2/myself"
 CONFLUENCE_CURRENT_USER_URL = "https://example.atlassian.net/wiki/rest/api/user/current"
-JIRA_ISSUE_URL = "https://example.atlassian.net/rest/api/2/issue/PROJ-1"
-JIRA_COMMENTS_URL = "https://example.atlassian.net/rest/api/2/issue/PROJ-1/comment"
+JIRA_ISSUE_URL = "https://example.atlassian.net/rest/api/3/issue/PROJ-1"
+JIRA_COMMENTS_URL = "https://example.atlassian.net/rest/api/3/issue/PROJ-1/comment"
 
 _ADF_TEXT_DOC = {
     "type": "doc",

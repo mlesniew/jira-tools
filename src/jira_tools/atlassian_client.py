@@ -62,7 +62,10 @@ class ReadOnlyJiraClient:
 
     def get_ticket(self, key: str) -> JiraTicket:
         """Fetch a ticket's summary/status/type/description and all of its comments."""
-        issue = self._client.issue(key, fields="summary,description,status,issuetype")
+        url = f"{self._issue_url(key)}?fields=summary,description,status,issuetype"
+        issue = self._client.get(url)
+        if not isinstance(issue, dict):
+            raise ValueError("Issue endpoint returned an unexpected response")
         fields = issue["fields"]
         description = fields.get("description")
         return JiraTicket(
@@ -74,11 +77,16 @@ class ReadOnlyJiraClient:
             comments=self._get_all_comments(key),
         )
 
+    def _issue_url(self, key: str) -> str:
+        # API v3 (not the library default, v2) is required here: v2 returns
+        # description/comment bodies as plain wiki-markup strings, not ADF.
+        return f"{self._client.resource_url('issue', api_version='3')}/{key}"
+
     def _get_all_comments(self, key: str) -> list[JiraComment]:
         comments: list[JiraComment] = []
         start_at = 0
         total = 1
-        url = f"{self._client.resource_url('issue')}/{key}/comment"
+        url = f"{self._issue_url(key)}/comment"
         while len(comments) < total:
             page = self._client.get(
                 url, params={"startAt": start_at, "maxResults": _COMMENT_PAGE_SIZE}
