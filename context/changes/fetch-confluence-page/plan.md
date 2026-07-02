@@ -334,10 +334,10 @@ Not applicable — purely additive; no existing data or schema changes.
 
 #### Automated
 
-- [x] 1.1 Unit tests pass: `uv run pytest tests/test_atlassian_client.py`
-- [x] 1.2 `page_identifier.py` unit tests pass (bare ID, pretty URL, unrecognized input) — new `tests/test_page_identifier.py`
-- [x] 1.3 Type checking passes: `uv run mypy`
-- [x] 1.4 Linting passes: `uv run ruff check .`
+- [x] 1.1 Unit tests pass: `uv run pytest tests/test_atlassian_client.py` — 1fe5cce
+- [x] 1.2 `page_identifier.py` unit tests pass (bare ID, pretty URL, unrecognized input) — new `tests/test_page_identifier.py` — 1fe5cce
+- [x] 1.3 Type checking passes: `uv run mypy` — 1fe5cce
+- [x] 1.4 Linting passes: `uv run ruff check .` — 1fe5cce
 
 #### Manual
 
@@ -347,11 +347,11 @@ Not applicable — purely additive; no existing data or schema changes.
 
 #### Automated
 
-- [ ] 2.1 Unit tests pass: `uv run pytest tests/test_page_document.py`
-- [ ] 2.2 CLI tests pass: `uv run pytest tests/test_cli.py -k fetch_page`
-- [ ] 2.3 Full suite passes: `uv run pytest`
-- [ ] 2.4 Type checking passes: `uv run mypy`
-- [ ] 2.5 Linting passes: `uv run ruff check .`
+- [x] 2.1 Unit tests pass: `uv run pytest tests/test_page_document.py`
+- [x] 2.2 CLI tests pass: `uv run pytest tests/test_cli.py -k fetch_page`
+- [x] 2.3 Full suite passes: `uv run pytest`
+- [x] 2.4 Type checking passes: `uv run mypy`
+- [x] 2.5 Linting passes: `uv run ruff check .`
 
 #### Manual
 

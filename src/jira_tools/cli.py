@@ -8,6 +8,8 @@ from jira_tools.atlassian_client import (
     ReadOnlyJiraClient,
 )
 from jira_tools.config import ConfigError, config_path, load_config, permission_warning
+from jira_tools.page_document import build_page_document
+from jira_tools.page_identifier import parse_page_id
 from jira_tools.ticket_document import build_ticket_document
 
 app = typer.Typer(
@@ -63,6 +65,33 @@ def fetch_ticket(key: str) -> None:
         raise typer.Exit(code=1) from None
 
     typer.echo(build_ticket_document(ticket))
+
+
+@app.command(name="fetch-page")
+def fetch_page(identifier: str) -> None:
+    """Fetch a Confluence page and print it as Markdown."""
+    try:
+        page_id = parse_page_id(identifier)
+    except ValueError as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(code=1) from exc
+
+    path = config_path()
+    try:
+        if path.is_file() and (warning := permission_warning(path)):
+            typer.echo(warning, err=True)
+        config = load_config(path)
+    except ConfigError as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(code=1) from exc
+
+    try:
+        page = ReadOnlyConfluenceClient(config).get_page(page_id)
+    except Exception:
+        typer.echo(f"Could not fetch page {identifier}: not found or not accessible.", err=True)
+        raise typer.Exit(code=1) from None
+
+    typer.echo(build_page_document(page))
 
 
 def _report(product: str, whoami: Callable[[], IdentityCheckResult]) -> bool:

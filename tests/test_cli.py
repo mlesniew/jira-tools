@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import pytest
@@ -12,6 +13,7 @@ JIRA_MYSELF_URL = "https://example.atlassian.net/rest/api/2/myself"
 CONFLUENCE_CURRENT_USER_URL = "https://example.atlassian.net/wiki/rest/api/user/current"
 JIRA_ISSUE_URL = "https://example.atlassian.net/rest/api/3/issue/PROJ-1"
 JIRA_COMMENTS_URL = "https://example.atlassian.net/rest/api/3/issue/PROJ-1/comment"
+CONFLUENCE_PAGE_URL = "https://example.atlassian.net/wiki/api/v2/pages/12345"
 
 _ADF_TEXT_DOC = {
     "type": "doc",
@@ -248,6 +250,117 @@ def test_fetch_ticket_never_leaks_token_on_failure(
     responses.add(responses.GET, JIRA_ISSUE_URL, json={"message": "Not Found"}, status=404)
 
     result = runner.invoke(app, ["fetch-ticket", "PROJ-1"])
+
+    assert "s3cr3t-token" not in result.stdout
+    assert "s3cr3t-token" not in result.stderr
+
+
+@responses.activate
+def test_fetch_page_prints_markdown_document(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_config(tmp_path, monkeypatch)
+    responses.add(
+        responses.GET,
+        CONFLUENCE_PAGE_URL,
+        json={
+            "id": "12345",
+            "title": "A Page",
+            "status": "current",
+            "body": {"atlas_doc_format": {"value": json.dumps(_ADF_TEXT_DOC)}},
+        },
+        status=200,
+    )
+
+    result = runner.invoke(app, ["fetch-page", "12345"])
+
+    assert result.exit_code == 0
+    assert "# A Page" in result.stdout
+    assert "12345" in result.stdout
+    assert "hello" in result.stdout
+
+
+@responses.activate
+def test_fetch_page_accepts_pretty_url(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _write_config(tmp_path, monkeypatch)
+    responses.add(
+        responses.GET,
+        CONFLUENCE_PAGE_URL,
+        json={
+            "id": "12345",
+            "title": "A Page",
+            "status": "current",
+            "body": {"atlas_doc_format": {"value": json.dumps(_ADF_TEXT_DOC)}},
+        },
+        status=200,
+    )
+
+    result = runner.invoke(
+        app,
+        ["fetch-page", "https://example.atlassian.net/wiki/spaces/ENG/pages/12345/A+Page"],
+    )
+
+    assert result.exit_code == 0
+    assert "# A Page" in result.stdout
+
+
+@responses.activate
+def test_fetch_page_fails_cleanly_on_not_found(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_config(tmp_path, monkeypatch)
+    responses.add(responses.GET, CONFLUENCE_PAGE_URL, json={"message": "Not Found"}, status=404)
+
+    result = runner.invoke(app, ["fetch-page", "12345"])
+
+    assert result.exit_code != 0
+    assert "12345" in result.stderr
+    assert "Traceback" not in result.stderr
+
+
+def test_fetch_page_fails_cleanly_on_bad_identifier_before_network_call(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_config(tmp_path, monkeypatch)
+
+    result = runner.invoke(app, ["fetch-page", "not-a-real-identifier"])
+
+    assert result.exit_code != 0
+    assert "not-a-real-identifier" in result.stderr
+    assert "Traceback" not in result.stderr
+
+
+@responses.activate
+def test_fetch_page_never_leaks_token_on_success(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_config(tmp_path, monkeypatch)
+    responses.add(
+        responses.GET,
+        CONFLUENCE_PAGE_URL,
+        json={
+            "id": "12345",
+            "title": "A Page",
+            "status": "current",
+            "body": {"atlas_doc_format": {"value": json.dumps(_ADF_TEXT_DOC)}},
+        },
+        status=200,
+    )
+
+    result = runner.invoke(app, ["fetch-page", "12345"])
+
+    assert "s3cr3t-token" not in result.stdout
+    assert "s3cr3t-token" not in result.stderr
+
+
+@responses.activate
+def test_fetch_page_never_leaks_token_on_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_config(tmp_path, monkeypatch)
+    responses.add(responses.GET, CONFLUENCE_PAGE_URL, json={"message": "Not Found"}, status=404)
+
+    result = runner.invoke(app, ["fetch-page", "12345"])
 
     assert "s3cr3t-token" not in result.stdout
     assert "s3cr3t-token" not in result.stderr
