@@ -347,11 +347,11 @@ Not applicable — purely additive; no existing data or schema changes.
 
 #### Automated
 
-- [x] 2.1 Unit tests pass: `uv run pytest tests/test_page_document.py`
-- [x] 2.2 CLI tests pass: `uv run pytest tests/test_cli.py -k fetch_page`
-- [x] 2.3 Full suite passes: `uv run pytest`
-- [x] 2.4 Type checking passes: `uv run mypy`
-- [x] 2.5 Linting passes: `uv run ruff check .`
+- [x] 2.1 Unit tests pass: `uv run pytest tests/test_page_document.py` — cbdbd0f
+- [x] 2.2 CLI tests pass: `uv run pytest tests/test_cli.py -k fetch_page` — cbdbd0f
+- [x] 2.3 Full suite passes: `uv run pytest` — cbdbd0f
+- [x] 2.4 Type checking passes: `uv run mypy` — cbdbd0f
+- [x] 2.5 Linting passes: `uv run ruff check .` — cbdbd0f
 
 #### Manual
 
