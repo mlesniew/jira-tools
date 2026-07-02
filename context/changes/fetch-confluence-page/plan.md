@@ -326,6 +326,20 @@ Not applicable — purely additive; no existing data or schema changes.
   `GET /pages/{id}` operation, `BodySingle`/`BodyType` schemas — confirms
   `body.atlas_doc_format.value` is a JSON string.
 
+## Post-implementation fixes
+
+- **atlassian-python-api internal error logging suppressed** — `cbfcf0d`.
+  Not in the original plan. Manual verification of `fetch-page` against a
+  nonexistent page ID found that `atlassian-python-api`'s `raise_for_status`
+  logs the raw exception via `log.error(exc)` on Confluence Cloud v2 error
+  bodies (JSON:API-shaped, no top-level `message` key), which reaches stderr
+  through Python logging's last-resort handler ahead of the CLI's own clean
+  error message — a potential credential/internal-detail leak. Fixed by
+  `logging.getLogger("atlassian").setLevel(logging.CRITICAL)` in
+  `atlassian_client.py`. Safe: every fetch path already wraps failures in its
+  own exception handler, so no user-facing error information is lost; covered
+  by `test_get_page_not_found_does_not_leak_library_internals`.
+
 ## Progress
 
 > Convention: `- [ ]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles. See `references/progress-format.md`.
@@ -341,7 +355,7 @@ Not applicable — purely additive; no existing data or schema changes.
 
 #### Manual
 
-- [ ] 1.5 `get_page(<real page ID>)` against a real Confluence Cloud page converts cleanly through `adf.to_markdown()`
+- [x] 1.5 `get_page(<real page ID>)` against a real Confluence Cloud page converts cleanly through `adf.to_markdown()`
 
 ### Phase 2: Markdown document assembly + CLI wiring
 
@@ -355,7 +369,7 @@ Not applicable — purely additive; no existing data or schema changes.
 
 #### Manual
 
-- [ ] 2.6 `jira-tools fetch-page <real page ID>` prints readable Markdown for a real page
-- [ ] 2.7 `jira-tools fetch-page <real page URL>` matches the bare-ID output
-- [ ] 2.8 `jira-tools fetch-page <nonexistent ID>` fails cleanly
-- [ ] 2.9 `jira-tools fetch-page not-a-real-identifier` fails cleanly before any network call
+- [x] 2.6 `jira-tools fetch-page <real page ID>` prints readable Markdown for a real page
+- [x] 2.7 `jira-tools fetch-page <real page URL>` matches the bare-ID output
+- [x] 2.8 `jira-tools fetch-page <nonexistent ID>` fails cleanly — cbfcf0d
+- [x] 2.9 `jira-tools fetch-page not-a-real-identifier` fails cleanly before any network call
