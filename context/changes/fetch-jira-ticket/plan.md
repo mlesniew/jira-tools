@@ -414,10 +414,10 @@ Not applicable — purely additive; no existing data or behavior changes.
 
 #### Automated
 
-- [x] 3.1 Unit tests pass: `uv run pytest tests/test_ticket_document.py`
-- [x] 3.2 CLI tests pass: `uv run pytest tests/test_cli.py` (success + 404/403 failure cases)
-- [x] 3.3 Token-leakage test confirms no credential in `fetch-ticket` output on success or failure
-- [x] 3.4 Full suite green: `uv run ruff check .`, `uv run mypy`, `uv run pytest`
+- [x] 3.1 Unit tests pass: `uv run pytest tests/test_ticket_document.py` — a60212e
+- [x] 3.2 CLI tests pass: `uv run pytest tests/test_cli.py` (success + 404/403 failure cases) — a60212e
+- [x] 3.3 Token-leakage test confirms no credential in `fetch-ticket` output on success or failure — a60212e
+- [x] 3.4 Full suite green: `uv run ruff check .`, `uv run mypy`, `uv run pytest` — a60212e
 
 #### Manual
 
