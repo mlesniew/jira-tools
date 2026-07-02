@@ -389,10 +389,10 @@ Not applicable — purely additive; no existing data or behavior changes.
 
 #### Automated
 
-- [x] 1.1 `marklas` added to `pyproject.toml` / `uv.lock`: `uv sync` runs cleanly
-- [x] 1.2 Unit tests pass: `uv run pytest tests/test_adf.py`
-- [x] 1.3 Type checking passes: `uv run mypy`
-- [x] 1.4 Linting passes: `uv run ruff check .`
+- [x] 1.1 `marklas` added to `pyproject.toml` / `uv.lock`: `uv sync` runs cleanly — 8b21b13
+- [x] 1.2 Unit tests pass: `uv run pytest tests/test_adf.py` — 8b21b13
+- [x] 1.3 Type checking passes: `uv run mypy` — 8b21b13
+- [x] 1.4 Linting passes: `uv run ruff check .` — 8b21b13
 
 #### Manual
 
@@ -402,9 +402,9 @@ Not applicable — purely additive; no existing data or behavior changes.
 
 #### Automated
 
-- [ ] 2.1 Unit tests pass: `uv run pytest tests/test_atlassian_client.py` (incl. multi-page comment pagination and HTTPError propagation)
-- [ ] 2.2 Type checking passes: `uv run mypy`
-- [ ] 2.3 Linting passes: `uv run ruff check .`
+- [x] 2.1 Unit tests pass: `uv run pytest tests/test_atlassian_client.py` (incl. multi-page comment pagination and HTTPError propagation)
+- [x] 2.2 Type checking passes: `uv run mypy`
+- [x] 2.3 Linting passes: `uv run ruff check .`
 
 #### Manual
 

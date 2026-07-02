@@ -11,15 +11,36 @@ from __future__ import annotations
 from atlassian import Confluence, Jira
 from pydantic import BaseModel
 
+from jira_tools.adf import ADFNode
 from jira_tools.config import AtlassianConfig
 
 _CONFLUENCE_CURRENT_USER_PATH = "rest/api/user/current"
+_COMMENT_PAGE_SIZE = 50
 
 
 class IdentityCheckResult(BaseModel):
     """The identity confirmed by a product's "who am I" endpoint."""
 
     display_name: str
+
+
+class JiraComment(BaseModel):
+    """A single comment on a Jira ticket."""
+
+    author: str
+    created: str
+    body: ADFNode
+
+
+class JiraTicket(BaseModel):
+    """The subset of a Jira issue's fields this project's retrieval needs."""
+
+    key: str
+    summary: str
+    status: str
+    issue_type: str
+    description: ADFNode | None
+    comments: list[JiraComment]
 
 
 class ReadOnlyJiraClient:
@@ -38,6 +59,43 @@ class ReadOnlyJiraClient:
         """Confirm the configured credentials via Jira's current-user endpoint."""
         response = self._client.myself()  # type: ignore[no-untyped-call]
         return IdentityCheckResult(display_name=response["displayName"])
+
+    def get_ticket(self, key: str) -> JiraTicket:
+        """Fetch a ticket's summary/status/type/description and all of its comments."""
+        issue = self._client.issue(key, fields="summary,description,status,issuetype")
+        fields = issue["fields"]
+        description = fields.get("description")
+        return JiraTicket(
+            key=issue["key"],
+            summary=fields["summary"],
+            status=fields["status"]["name"],
+            issue_type=fields["issuetype"]["name"],
+            description=ADFNode.model_validate(description) if description else None,
+            comments=self._get_all_comments(key),
+        )
+
+    def _get_all_comments(self, key: str) -> list[JiraComment]:
+        comments: list[JiraComment] = []
+        start_at = 0
+        total = 1
+        url = f"{self._client.resource_url('issue')}/{key}/comment"
+        while len(comments) < total:
+            page = self._client.get(
+                url, params={"startAt": start_at, "maxResults": _COMMENT_PAGE_SIZE}
+            )
+            if not isinstance(page, dict):
+                raise ValueError("Comment endpoint returned an unexpected response")
+            total = page["total"]
+            for raw_comment in page["comments"]:
+                comments.append(
+                    JiraComment(
+                        author=raw_comment["author"]["displayName"],
+                        created=raw_comment["created"],
+                        body=ADFNode.model_validate(raw_comment["body"]),
+                    )
+                )
+            start_at += _COMMENT_PAGE_SIZE
+        return comments
 
 
 class ReadOnlyConfluenceClient:
