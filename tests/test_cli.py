@@ -20,6 +20,14 @@ _ADF_TEXT_DOC = {
     "content": [{"type": "paragraph", "content": [{"type": "text", "text": "hello"}]}],
 }
 
+# Confluence Cloud's v2 API error bodies are JSON:API-shaped and have no
+# top-level "message" key, unlike the legacy v1 API.
+_CONFLUENCE_V2_ERROR_BODY = {
+    "errors": [
+        {"status": "404", "code": "not-found", "title": "No content found with the given id"}
+    ]
+}
+
 VALID_TOML = """
 site_url = "https://example.atlassian.net"
 email = "user@example.com"
@@ -309,7 +317,7 @@ def test_fetch_page_fails_cleanly_on_not_found(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     _write_config(tmp_path, monkeypatch)
-    responses.add(responses.GET, CONFLUENCE_PAGE_URL, json={"message": "Not Found"}, status=404)
+    responses.add(responses.GET, CONFLUENCE_PAGE_URL, json=_CONFLUENCE_V2_ERROR_BODY, status=404)
 
     result = runner.invoke(app, ["fetch-page", "12345"])
 
@@ -358,7 +366,7 @@ def test_fetch_page_never_leaks_token_on_failure(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     _write_config(tmp_path, monkeypatch)
-    responses.add(responses.GET, CONFLUENCE_PAGE_URL, json={"message": "Not Found"}, status=404)
+    responses.add(responses.GET, CONFLUENCE_PAGE_URL, json=_CONFLUENCE_V2_ERROR_BODY, status=404)
 
     result = runner.invoke(app, ["fetch-page", "12345"])
 

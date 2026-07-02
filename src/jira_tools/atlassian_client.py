@@ -9,12 +9,22 @@ methods rather than reaching into the underlying library directly.
 from __future__ import annotations
 
 import json
+import logging
 
 from atlassian import Confluence, Jira
 from pydantic import BaseModel
 
 from jira_tools.adf import ADFNode
 from jira_tools.config import AtlassianConfig
+
+# atlassian-python-api logs internal parsing failures via log.error(exc) (e.g.
+# Confluence.raise_for_status KeyError'ing on error bodies that lack a
+# top-level "message" key, which real Confluence Cloud v2 error responses
+# do). With no handler configured, Python's logging falls back to printing
+# str(exc) straight to stderr — leaking implementation noise (and, via its
+# DEBUG curl logging, credentials) into our CLI's clean error output. Silence
+# it; we handle and report our own errors.
+logging.getLogger("atlassian").setLevel(logging.CRITICAL)
 
 _CONFLUENCE_CURRENT_USER_PATH = "rest/api/user/current"
 _COMMENT_PAGE_SIZE = 50

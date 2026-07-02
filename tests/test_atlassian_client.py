@@ -19,6 +19,16 @@ _ADF_TEXT_DOC = {
     "content": [{"type": "paragraph", "content": [{"type": "text", "text": "hello"}]}],
 }
 
+# Confluence Cloud's v2 API error bodies are JSON:API-shaped and have no
+# top-level "message" key (unlike the legacy v1 API) — the realistic shape
+# for a get_page() 404, used to exercise the real error path rather than a
+# body that happens to dodge it.
+_CONFLUENCE_V2_ERROR_BODY = {
+    "errors": [
+        {"status": "404", "code": "not-found", "title": "No content found with the given id"}
+    ]
+}
+
 
 def _comment(comment_id: str, author: str) -> dict[str, object]:
     return {
@@ -258,7 +268,26 @@ def test_get_page_with_missing_body_returns_none() -> None:
 
 @responses.activate
 def test_get_page_raises_on_not_found() -> None:
-    responses.add(responses.GET, CONFLUENCE_PAGE_URL, json={"message": "Not Found"}, status=404)
+    responses.add(responses.GET, CONFLUENCE_PAGE_URL, json=_CONFLUENCE_V2_ERROR_BODY, status=404)
 
     with pytest.raises(HTTPError):
         ReadOnlyConfluenceClient(_config()).get_page("12345")
+
+
+@responses.activate
+def test_get_page_not_found_does_not_leak_library_internals(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    # atlassian-python-api's Confluence.raise_for_status assumes error bodies
+    # always carry a top-level "message" key; real Confluence Cloud v2 error
+    # bodies (like _CONFLUENCE_V2_ERROR_BODY) don't, which raises an internal
+    # KeyError the library logs via log.error(exc) — and with no handler
+    # configured, that reaches stderr via logging's last-resort handler
+    # outside pytest. The module-level logger suppression in
+    # atlassian_client.py must keep this from ever being emitted.
+    responses.add(responses.GET, CONFLUENCE_PAGE_URL, json=_CONFLUENCE_V2_ERROR_BODY, status=404)
+
+    with pytest.raises(HTTPError):
+        ReadOnlyConfluenceClient(_config()).get_page("12345")
+
+    assert not any(record.name.startswith("atlassian") for record in caplog.records)
