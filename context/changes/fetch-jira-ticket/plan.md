@@ -389,10 +389,10 @@ Not applicable — purely additive; no existing data or behavior changes.
 
 #### Automated
 
-- [ ] 1.1 `marklas` added to `pyproject.toml` / `uv.lock`: `uv sync` runs cleanly
-- [ ] 1.2 Unit tests pass: `uv run pytest tests/test_adf.py`
-- [ ] 1.3 Type checking passes: `uv run mypy`
-- [ ] 1.4 Linting passes: `uv run ruff check .`
+- [x] 1.1 `marklas` added to `pyproject.toml` / `uv.lock`: `uv sync` runs cleanly
+- [x] 1.2 Unit tests pass: `uv run pytest tests/test_adf.py`
+- [x] 1.3 Type checking passes: `uv run mypy`
+- [x] 1.4 Linting passes: `uv run ruff check .`
 
 #### Manual
 

@@ -223,6 +223,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "atlassian-python-api" },
+    { name = "marklas" },
     { name = "pydantic" },
     { name = "typer" },
 ]
@@ -238,6 +239,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "atlassian-python-api", specifier = ">=4.0.7" },
+    { name = "marklas", specifier = ">=0.8.2" },
     { name = "pydantic", specifier = ">=2.13.4" },
     { name = "typer", specifier = ">=0.26.8" },
 ]
@@ -334,12 +336,33 @@ wheels = [
 ]
 
 [[package]]
+name = "marklas"
+version = "0.8.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "mistune" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8b/92/b2352fa3fe9810d59dd747a713b05a3841d64cc4a256ae6dc5f9cadde7ee/marklas-0.8.2.tar.gz", hash = "sha256:1d6baa8688ea1bb56d1c9e0eac19979a78d496d408814dffb1b90a318334eec2", size = 48209, upload-time = "2026-06-30T07:20:59.399Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/af/47/79b835c0e08982fb0a2f808ab7406617e40206f636b630f0277248790e3f/marklas-0.8.2-py3-none-any.whl", hash = "sha256:bd0bf739d784b40e83ca9ef2e3502b2915b1faa4125ff7173f19bc2fddff799a", size = 56592, upload-time = "2026-06-30T07:20:58.147Z" },
+]
+
+[[package]]
 name = "mdurl"
 version = "0.1.2"
 source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/d6/54/cfe61301667036ec958cb99bd3efefba235e65cdeb9c84d24a8293ba1d90/mdurl-0.1.2.tar.gz", hash = "sha256:bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba", size = 8729, upload-time = "2022-08-14T12:40:10.846Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b3/38/89ba8ad64ae25be8de66a6d463314cf1eb366222074cfda9ee839c56a4b4/mdurl-0.1.2-py3-none-any.whl", hash = "sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8", size = 9979, upload-time = "2022-08-14T12:40:09.779Z" },
+]
+
+[[package]]
+name = "mistune"
+version = "3.3.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/04/5f/007786743f962224423753b78f7d7acb0f2ade46d1604f2e0fa2bedf9020/mistune-3.3.2.tar.gz", hash = "sha256:e12ee4f1e74336e91aa1141e35f913b337c40bdf7c0cc49f21fb853a27e8b62f", size = 111284, upload-time = "2026-06-23T00:29:28.568Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/44/43/894c2cbbcbdf53b57d1257a249811abe2ee9ab7ef76af301b40f1c054533/mistune-3.3.2-py3-none-any.whl", hash = "sha256:a678a56387d487db7368ede4647cb2ba1deff22ce61f92343e4ebe0ddfce4f2d", size = 61554, upload-time = "2026-06-23T00:29:27.088Z" },
 ]
 
 [[package]]

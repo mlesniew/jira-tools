@@ -9,6 +9,7 @@ authors = [
 requires-python = ">=3.12"
 dependencies = [
     "atlassian-python-api>=4.0.7",
+    "marklas>=0.8.2",
     "pydantic>=2.13.4",
     "typer>=0.26.8",
 ]
