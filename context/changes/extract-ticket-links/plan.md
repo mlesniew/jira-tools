@@ -399,9 +399,9 @@ sites need no changes; adding it is additive.
 
 #### Automated
 
-- [x] 3.1 Type checking passes: `uv run mypy`
-- [x] 3.2 Linting passes: `uv run ruff check .`
-- [x] 3.3 Full test suite passes: `uv run pytest`
+- [x] 3.1 Type checking passes: `uv run mypy` — 2743abf
+- [x] 3.2 Linting passes: `uv run ruff check .` — 2743abf
+- [x] 3.3 Full test suite passes: `uv run pytest` — 2743abf
 
 #### Manual
 
