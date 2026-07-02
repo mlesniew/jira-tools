@@ -391,17 +391,17 @@ sites need no changes; adding it is additive.
 
 #### Automated
 
-- [x] 2.1 Type checking passes: `uv run mypy`
-- [x] 2.2 Linting passes: `uv run ruff check .`
-- [x] 2.3 Unit tests pass: `uv run pytest tests/test_link_extraction.py`
+- [x] 2.1 Type checking passes: `uv run mypy` — 83853ea
+- [x] 2.2 Linting passes: `uv run ruff check .` — 83853ea
+- [x] 2.3 Unit tests pass: `uv run pytest tests/test_link_extraction.py` — 83853ea
 
 ### Phase 3: Markdown summary + CLI wiring
 
 #### Automated
 
-- [ ] 3.1 Type checking passes: `uv run mypy`
-- [ ] 3.2 Linting passes: `uv run ruff check .`
-- [ ] 3.3 Full test suite passes: `uv run pytest`
+- [x] 3.1 Type checking passes: `uv run mypy`
+- [x] 3.2 Linting passes: `uv run ruff check .`
+- [x] 3.3 Full test suite passes: `uv run pytest`
 
 #### Manual
 

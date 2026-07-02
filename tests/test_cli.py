@@ -372,3 +372,148 @@ def test_fetch_page_never_leaks_token_on_failure(
 
     assert "s3cr3t-token" not in result.stdout
     assert "s3cr3t-token" not in result.stderr
+
+
+@responses.activate
+def test_extract_links_for_ticket_prints_markdown_document(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_config(tmp_path, monkeypatch)
+    responses.add(
+        responses.GET,
+        JIRA_ISSUE_URL,
+        json={
+            "key": "PROJ-1",
+            "fields": {
+                "summary": "Something is broken",
+                "status": {"name": "In Progress"},
+                "issuetype": {"name": "Bug"},
+                "description": {
+                    "type": "doc",
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "content": [{"type": "text", "text": "See PROJ-2 for context."}],
+                        }
+                    ],
+                },
+                "issuelinks": [
+                    {
+                        "type": {"name": "Blocks", "inward": "is blocked by", "outward": "blocks"},
+                        "outwardIssue": {"key": "PROJ-3"},
+                    }
+                ],
+            },
+        },
+        status=200,
+    )
+    responses.add(
+        responses.GET,
+        JIRA_COMMENTS_URL,
+        json={"startAt": 0, "maxResults": 50, "total": 0, "comments": []},
+        status=200,
+    )
+
+    result = runner.invoke(app, ["extract-links", "PROJ-1"])
+
+    assert result.exit_code == 0
+    assert "# Links found in PROJ-1" in result.stdout
+    assert "- PROJ-2" in result.stdout
+    assert "- PROJ-3 (blocks)" in result.stdout
+    assert "*No Confluence pages found.*" in result.stdout
+
+
+@responses.activate
+def test_extract_links_for_page_prints_markdown_document(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_config(tmp_path, monkeypatch)
+    responses.add(
+        responses.GET,
+        CONFLUENCE_PAGE_URL,
+        json={
+            "id": "12345",
+            "title": "A Page",
+            "status": "current",
+            "body": {
+                "atlas_doc_format": {
+                    "value": json.dumps(
+                        {
+                            "type": "doc",
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [{"type": "text", "text": "See PROJ-1."}],
+                                }
+                            ],
+                        }
+                    )
+                }
+            },
+        },
+        status=200,
+    )
+
+    result = runner.invoke(app, ["extract-links", "12345"])
+
+    assert result.exit_code == 0
+    assert "# Links found in 12345" in result.stdout
+    assert "- PROJ-1" in result.stdout
+    assert "## Issue links" not in result.stdout
+
+
+def test_extract_links_fails_cleanly_on_bad_identifier_before_network_call(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_config(tmp_path, monkeypatch)
+
+    result = runner.invoke(app, ["extract-links", "not-a-real-identifier"])
+
+    assert result.exit_code != 0
+    assert "not-a-real-identifier" in result.stderr
+    assert "Traceback" not in result.stderr
+
+
+@responses.activate
+def test_extract_links_never_leaks_token_on_success(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_config(tmp_path, monkeypatch)
+    responses.add(
+        responses.GET,
+        JIRA_ISSUE_URL,
+        json={
+            "key": "PROJ-1",
+            "fields": {
+                "summary": "Something is broken",
+                "status": {"name": "In Progress"},
+                "issuetype": {"name": "Bug"},
+                "description": None,
+            },
+        },
+        status=200,
+    )
+    responses.add(
+        responses.GET,
+        JIRA_COMMENTS_URL,
+        json={"startAt": 0, "maxResults": 50, "total": 0, "comments": []},
+        status=200,
+    )
+
+    result = runner.invoke(app, ["extract-links", "PROJ-1"])
+
+    assert "s3cr3t-token" not in result.stdout
+    assert "s3cr3t-token" not in result.stderr
+
+
+@responses.activate
+def test_extract_links_never_leaks_token_on_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_config(tmp_path, monkeypatch)
+    responses.add(responses.GET, JIRA_ISSUE_URL, json={"message": "Not Found"}, status=404)
+
+    result = runner.invoke(app, ["extract-links", "PROJ-1"])
+
+    assert "s3cr3t-token" not in result.stdout
+    assert "s3cr3t-token" not in result.stderr
