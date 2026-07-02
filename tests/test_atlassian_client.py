@@ -292,6 +292,41 @@ def test_get_ticket_parses_inward_issue_link() -> None:
 
 
 @responses.activate
+def test_get_ticket_skips_issue_link_missing_both_outward_and_inward_issue() -> None:
+    responses.add(
+        responses.GET,
+        JIRA_ISSUE_URL,
+        json={
+            "key": "PROJ-1",
+            "fields": {
+                "summary": "Something is broken",
+                "status": {"name": "In Progress"},
+                "issuetype": {"name": "Bug"},
+                "description": None,
+                "issuelinks": [
+                    # A link to an issue the caller lacks permission to view
+                    # carries neither key — must be skipped, not raise.
+                    {"type": _BLOCKS_LINK_TYPE},
+                    {"type": _BLOCKS_LINK_TYPE, "outwardIssue": {"key": "PROJ-2"}},
+                ],
+            },
+        },
+        status=200,
+    )
+    responses.add(
+        responses.GET,
+        JIRA_COMMENTS_URL,
+        json={"startAt": 0, "maxResults": 50, "total": 0, "comments": []},
+        status=200,
+    )
+
+    ticket = ReadOnlyJiraClient(_config()).get_ticket("PROJ-1")
+
+    assert len(ticket.issue_links) == 1
+    assert ticket.issue_links[0].key == "PROJ-2"
+
+
+@responses.activate
 def test_get_ticket_sorts_multiple_issue_links_by_key_and_relation() -> None:
     responses.add(
         responses.GET,

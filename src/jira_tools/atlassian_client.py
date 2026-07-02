@@ -88,17 +88,19 @@ class ReadOnlyJiraClient:
             raise ValueError("Issue endpoint returned an unexpected response")
         fields = issue["fields"]
         description = fields.get("description")
-        issue_links = [
-            JiraIssueLink(
-                key=raw_link["outwardIssue"]["key"]
+        issue_links = []
+        for raw_link in fields.get("issuelinks", []):
+            linked_issue = raw_link.get("outwardIssue") or raw_link.get("inwardIssue")
+            if linked_issue is None:
+                # A restricted linked issue the caller can't view is omitted
+                # entirely rather than crashing the whole ticket fetch.
+                continue
+            relation = (
+                raw_link["type"]["outward"]
                 if "outwardIssue" in raw_link
-                else raw_link["inwardIssue"]["key"],
-                relation=raw_link["type"]["outward"]
-                if "outwardIssue" in raw_link
-                else raw_link["type"]["inward"],
+                else raw_link["type"]["inward"]
             )
-            for raw_link in fields.get("issuelinks", [])
-        ]
+            issue_links.append(JiraIssueLink(key=linked_issue["key"], relation=relation))
         return JiraTicket(
             key=issue["key"],
             summary=fields["summary"],
