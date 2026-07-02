@@ -132,8 +132,16 @@ parsing dependency is needed). Missing file → a typed exception whose message
 names the expected path and required fields (`site_url`, `email`,
 `api_token`). Malformed TOML or missing fields → a typed exception naming
 which field is missing/invalid, without echoing the rest of the file's
-contents. If the file's POSIX permissions grant read access beyond the owner,
-emit a `typer.echo` warning (to stderr) rather than failing the load.
+contents — wrap any underlying `pydantic.ValidationError` with
+`raise ConfigInvalidError(...) from None`, since pydantic embeds the raw
+offending value in its own error message/`__cause__` and default exception
+chaining would otherwise carry a bad `api_token` value forward into any
+future log call or error tracker even though the wrapping exception's own
+message is clean. If the file's POSIX permissions grant read access beyond
+the owner, return a warning message (`str | None`) rather than printing it
+directly — `config.py` stays framework-agnostic per CLAUDE.md's convention
+that Typer/CLI concerns live in `cli.py`; the CLI layer (Phase 3) decides
+whether/how to display it.
 
 ### Success Criteria:
 
@@ -189,9 +197,12 @@ into the underlying library's full client directly.
 
 **Contract**: Two factory functions/classes, one per product (e.g.
 `ReadOnlyJiraClient`, `ReadOnlyConfluenceClient`), each constructed from an
-`AtlassianConfig` with `cloud=True` and the email/token as
-username/password per `atlassian-python-api`'s Cloud auth convention. Each
-wrapper exposes exactly one method for this phase — a current-user/identity
+`AtlassianConfig` with `cloud=True`, `timeout=10`, and the email/token as
+username/password per `atlassian-python-api`'s Cloud auth convention. The
+library's own default (`timeout=75`) is too long for a command meant to be a
+fast, interactive credential check — an unreachable/misconfigured
+`site_url` should fail within seconds, not silently hang for over a minute.
+Each wrapper exposes exactly one method for this phase — a current-user/identity
 check — that calls the underlying library's read-only "who am I" endpoint for
 that product and returns a typed result (e.g. a pydantic model with
 `display_name: str`) rather than the library's raw response object.

@@ -31,6 +31,7 @@ class ReadOnlyJiraClient:
             username=config.email,
             password=config.api_token.get_secret_value(),
             cloud=True,
+            timeout=10,
         )
 
     def whoami(self) -> IdentityCheckResult:
@@ -48,6 +49,7 @@ class ReadOnlyConfluenceClient:
             username=config.email,
             password=config.api_token.get_secret_value(),
             cloud=True,
+            timeout=10,
         )
 
     def whoami(self) -> IdentityCheckResult:
