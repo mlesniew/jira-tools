@@ -1,3 +1,5 @@
+import json
+
 import pytest
 import responses
 from pydantic import SecretStr
@@ -10,6 +12,7 @@ JIRA_MYSELF_URL = "https://example.atlassian.net/rest/api/2/myself"
 CONFLUENCE_CURRENT_USER_URL = "https://example.atlassian.net/wiki/rest/api/user/current"
 JIRA_ISSUE_URL = "https://example.atlassian.net/rest/api/3/issue/PROJ-1"
 JIRA_COMMENTS_URL = "https://example.atlassian.net/rest/api/3/issue/PROJ-1/comment"
+CONFLUENCE_PAGE_URL = "https://example.atlassian.net/wiki/api/v2/pages/12345"
 
 _ADF_TEXT_DOC = {
     "type": "doc",
@@ -84,7 +87,7 @@ def test_wrapper_classes_expose_no_write_implying_method() -> None:
     write_keywords = ("create", "update", "delete", "remove", "add", "set", "put", "post")
     expected_public_methods = {
         ReadOnlyJiraClient: ["whoami", "get_ticket"],
-        ReadOnlyConfluenceClient: ["whoami"],
+        ReadOnlyConfluenceClient: ["whoami", "get_page"],
     }
     for cls, expected in expected_public_methods.items():
         public_methods = [name for name in vars(cls) if not name.startswith("_")]
@@ -215,3 +218,47 @@ def test_get_ticket_raises_on_not_found() -> None:
 
     with pytest.raises(HTTPError):
         ReadOnlyJiraClient(_config()).get_ticket("PROJ-1")
+
+
+@responses.activate
+def test_get_page_returns_title_status_and_body() -> None:
+    responses.add(
+        responses.GET,
+        CONFLUENCE_PAGE_URL,
+        json={
+            "id": "12345",
+            "title": "A Page",
+            "status": "current",
+            "body": {"atlas_doc_format": {"value": json.dumps(_ADF_TEXT_DOC)}},
+        },
+        status=200,
+    )
+
+    page = ReadOnlyConfluenceClient(_config()).get_page("12345")
+
+    assert page.id == "12345"
+    assert page.title == "A Page"
+    assert page.status == "current"
+    assert page.body is not None
+
+
+@responses.activate
+def test_get_page_with_missing_body_returns_none() -> None:
+    responses.add(
+        responses.GET,
+        CONFLUENCE_PAGE_URL,
+        json={"id": "12345", "title": "A Page", "status": "current", "body": {}},
+        status=200,
+    )
+
+    page = ReadOnlyConfluenceClient(_config()).get_page("12345")
+
+    assert page.body is None
+
+
+@responses.activate
+def test_get_page_raises_on_not_found() -> None:
+    responses.add(responses.GET, CONFLUENCE_PAGE_URL, json={"message": "Not Found"}, status=404)
+
+    with pytest.raises(HTTPError):
+        ReadOnlyConfluenceClient(_config()).get_page("12345")

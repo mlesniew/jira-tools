@@ -8,6 +8,8 @@ methods rather than reaching into the underlying library directly.
 
 from __future__ import annotations
 
+import json
+
 from atlassian import Confluence, Jira
 from pydantic import BaseModel
 
@@ -109,6 +111,15 @@ class ReadOnlyJiraClient:
         return comments
 
 
+class ConfluencePage(BaseModel):
+    """The subset of a Confluence page's fields this project's retrieval needs."""
+
+    id: str
+    title: str
+    status: str
+    body: ADFNode | None
+
+
 class ReadOnlyConfluenceClient:
     """A read-only view of a Confluence Cloud site."""
 
@@ -127,3 +138,30 @@ class ReadOnlyConfluenceClient:
         if not isinstance(response, dict):
             raise ValueError("Confluence current-user endpoint returned an unexpected response")
         return IdentityCheckResult(display_name=response["displayName"])
+
+    def get_page(self, page_id: str) -> ConfluencePage:
+        """Fetch a page's title, status, and body by ID."""
+        response = self._client.get(
+            self._page_url(page_id), params={"body-format": "atlas_doc_format"}
+        )
+        if not isinstance(response, dict):
+            raise ValueError("Page endpoint returned an unexpected response")
+        # The v2 pages endpoint returns the ADF body as a JSON-encoded
+        # string (BodyType.value), unlike Jira's v3 issue API, where
+        # fields.description is already a nested ADF object.
+        raw_body = response.get("body", {}).get("atlas_doc_format", {}).get("value")
+        return ConfluencePage(
+            id=response["id"],
+            title=response["title"],
+            status=response["status"],
+            body=ADFNode.model_validate(json.loads(raw_body)) if raw_body else None,
+        )
+
+    def _page_url(self, page_id: str) -> str:
+        # The v1 content API (the library's wrapped get_page_by_id) predates
+        # ADF-format bodies. Only the v2 pages endpoint supports
+        # body-format=atlas_doc_format, and resource_url() can't build this
+        # path cleanly (Confluence's default api_version would inject a
+        # spurious "latest" segment), so this is a direct path string,
+        # mirroring how the underlying library itself builds its own v2 calls.
+        return f"api/v2/pages/{page_id}"
