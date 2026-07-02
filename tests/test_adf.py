@@ -107,6 +107,24 @@ def test_code_block_converts_to_fenced_block() -> None:
     assert 'print("hi")' in markdown
 
 
+def test_hard_break_converts_to_markdown_line_break_not_raw_html() -> None:
+    node = _doc(
+        {
+            "type": "paragraph",
+            "content": [
+                {"type": "text", "text": "Line one"},
+                {"type": "hardBreak"},
+                {"type": "text", "text": "Line two"},
+            ],
+        }
+    )
+
+    markdown = to_markdown(node)
+
+    assert "<br>" not in markdown
+    assert "Line one  \nLine two" in markdown
+
+
 def test_panel_degrades_gracefully_without_raising() -> None:
     node = _doc(
         {

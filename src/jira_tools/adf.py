@@ -22,4 +22,9 @@ class ADFNode(BaseModel):
 
 def to_markdown(node: ADFNode) -> str:
     """Convert a validated ADF node tree to a best-effort Markdown string."""
-    return marklas.to_md(node.model_dump(mode="json", exclude_none=True), plain=True)
+    markdown = marklas.to_md(node.model_dump(mode="json", exclude_none=True), plain=True)
+    # marklas always renders ADF hardBreak nodes as literal `<br>` (a
+    # deliberate choice for markdown round-trip fidelity, not affected by
+    # plain=True) rather than a CommonMark hard line break. Convert it so
+    # plain-text output reads as a normal line break instead of raw HTML.
+    return markdown.replace("<br>", "  \n")
