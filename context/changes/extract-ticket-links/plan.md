@@ -383,9 +383,9 @@ sites need no changes; adding it is additive.
 
 #### Automated
 
-- [ ] 1.1 Type checking passes: `uv run mypy`
-- [ ] 1.2 Linting passes: `uv run ruff check .`
-- [ ] 1.3 Unit tests pass: `uv run pytest tests/test_atlassian_client.py`
+- [x] 1.1 Type checking passes: `uv run mypy`
+- [x] 1.2 Linting passes: `uv run ruff check .`
+- [x] 1.3 Unit tests pass: `uv run pytest tests/test_atlassian_client.py`
 
 ### Phase 2: Link extraction module
 

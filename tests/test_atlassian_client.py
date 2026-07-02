@@ -8,6 +8,8 @@ from requests.exceptions import HTTPError
 from jira_tools.atlassian_client import ReadOnlyConfluenceClient, ReadOnlyJiraClient
 from jira_tools.config import AtlassianConfig
 
+_BLOCKS_LINK_TYPE = {"name": "Blocks", "inward": "is blocked by", "outward": "blocks"}
+
 JIRA_MYSELF_URL = "https://example.atlassian.net/rest/api/2/myself"
 CONFLUENCE_CURRENT_USER_URL = "https://example.atlassian.net/wiki/rest/api/user/current"
 JIRA_ISSUE_URL = "https://example.atlassian.net/rest/api/3/issue/PROJ-1"
@@ -192,6 +194,144 @@ def test_get_ticket_collects_comments_across_multiple_pages() -> None:
         "Jane Doe",
         "John Roe",
         "Ada Lovelace",
+    ]
+
+
+@responses.activate
+def test_get_ticket_with_no_issuelinks_field_returns_empty_list() -> None:
+    responses.add(
+        responses.GET,
+        JIRA_ISSUE_URL,
+        json={
+            "key": "PROJ-1",
+            "fields": {
+                "summary": "Something is broken",
+                "status": {"name": "In Progress"},
+                "issuetype": {"name": "Bug"},
+                "description": None,
+            },
+        },
+        status=200,
+    )
+    responses.add(
+        responses.GET,
+        JIRA_COMMENTS_URL,
+        json={"startAt": 0, "maxResults": 50, "total": 0, "comments": []},
+        status=200,
+    )
+
+    ticket = ReadOnlyJiraClient(_config()).get_ticket("PROJ-1")
+
+    assert ticket.issue_links == []
+
+
+@responses.activate
+def test_get_ticket_parses_outward_issue_link() -> None:
+    responses.add(
+        responses.GET,
+        JIRA_ISSUE_URL,
+        json={
+            "key": "PROJ-1",
+            "fields": {
+                "summary": "Something is broken",
+                "status": {"name": "In Progress"},
+                "issuetype": {"name": "Bug"},
+                "description": None,
+                "issuelinks": [
+                    {"type": _BLOCKS_LINK_TYPE, "outwardIssue": {"key": "PROJ-2"}},
+                ],
+            },
+        },
+        status=200,
+    )
+    responses.add(
+        responses.GET,
+        JIRA_COMMENTS_URL,
+        json={"startAt": 0, "maxResults": 50, "total": 0, "comments": []},
+        status=200,
+    )
+
+    ticket = ReadOnlyJiraClient(_config()).get_ticket("PROJ-1")
+
+    assert len(ticket.issue_links) == 1
+    assert ticket.issue_links[0].key == "PROJ-2"
+    assert ticket.issue_links[0].relation == "blocks"
+
+
+@responses.activate
+def test_get_ticket_parses_inward_issue_link() -> None:
+    responses.add(
+        responses.GET,
+        JIRA_ISSUE_URL,
+        json={
+            "key": "PROJ-1",
+            "fields": {
+                "summary": "Something is broken",
+                "status": {"name": "In Progress"},
+                "issuetype": {"name": "Bug"},
+                "description": None,
+                "issuelinks": [
+                    {"type": _BLOCKS_LINK_TYPE, "inwardIssue": {"key": "PROJ-3"}},
+                ],
+            },
+        },
+        status=200,
+    )
+    responses.add(
+        responses.GET,
+        JIRA_COMMENTS_URL,
+        json={"startAt": 0, "maxResults": 50, "total": 0, "comments": []},
+        status=200,
+    )
+
+    ticket = ReadOnlyJiraClient(_config()).get_ticket("PROJ-1")
+
+    assert len(ticket.issue_links) == 1
+    assert ticket.issue_links[0].key == "PROJ-3"
+    assert ticket.issue_links[0].relation == "is blocked by"
+
+
+@responses.activate
+def test_get_ticket_sorts_multiple_issue_links_by_key_and_relation() -> None:
+    responses.add(
+        responses.GET,
+        JIRA_ISSUE_URL,
+        json={
+            "key": "PROJ-1",
+            "fields": {
+                "summary": "Something is broken",
+                "status": {"name": "In Progress"},
+                "issuetype": {"name": "Bug"},
+                "description": None,
+                "issuelinks": [
+                    {"type": _BLOCKS_LINK_TYPE, "outwardIssue": {"key": "PROJ-9"}},
+                    {"type": _BLOCKS_LINK_TYPE, "inwardIssue": {"key": "PROJ-2"}},
+                    {
+                        "type": {
+                            "name": "Relates",
+                            "inward": "relates to",
+                            "outward": "relates to",
+                        },
+                        "outwardIssue": {"key": "PROJ-2"},
+                    },
+                ],
+            },
+        },
+        status=200,
+    )
+    responses.add(
+        responses.GET,
+        JIRA_COMMENTS_URL,
+        json={"startAt": 0, "maxResults": 50, "total": 0, "comments": []},
+        status=200,
+    )
+
+    ticket = ReadOnlyJiraClient(_config()).get_ticket("PROJ-1")
+
+    assert [(link.key, link.relation) for link in ticket.issue_links] == [
+        ("PROJ-2", "is blocked by"),
+        ("PROJ-2", "relates to"),
+        ("PROJ-9", "blocks"),
     ]
 
 

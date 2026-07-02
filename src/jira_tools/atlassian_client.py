@@ -44,6 +44,13 @@ class JiraComment(BaseModel):
     body: ADFNode
 
 
+class JiraIssueLink(BaseModel):
+    """A single Jira issue-link relationship to another ticket."""
+
+    key: str
+    relation: str
+
+
 class JiraTicket(BaseModel):
     """The subset of a Jira issue's fields this project's retrieval needs."""
 
@@ -53,6 +60,7 @@ class JiraTicket(BaseModel):
     issue_type: str
     description: ADFNode | None
     comments: list[JiraComment]
+    issue_links: list[JiraIssueLink] = []
 
 
 class ReadOnlyJiraClient:
@@ -73,13 +81,24 @@ class ReadOnlyJiraClient:
         return IdentityCheckResult(display_name=response["displayName"])
 
     def get_ticket(self, key: str) -> JiraTicket:
-        """Fetch a ticket's summary/status/type/description and all of its comments."""
-        url = f"{self._issue_url(key)}?fields=summary,description,status,issuetype"
+        """Fetch a ticket's summary/status/type/description, issue links, and comments."""
+        url = f"{self._issue_url(key)}?fields=summary,description,status,issuetype,issuelinks"
         issue = self._client.get(url)
         if not isinstance(issue, dict):
             raise ValueError("Issue endpoint returned an unexpected response")
         fields = issue["fields"]
         description = fields.get("description")
+        issue_links = [
+            JiraIssueLink(
+                key=raw_link["outwardIssue"]["key"]
+                if "outwardIssue" in raw_link
+                else raw_link["inwardIssue"]["key"],
+                relation=raw_link["type"]["outward"]
+                if "outwardIssue" in raw_link
+                else raw_link["type"]["inward"],
+            )
+            for raw_link in fields.get("issuelinks", [])
+        ]
         return JiraTicket(
             key=issue["key"],
             summary=fields["summary"],
@@ -87,6 +106,7 @@ class ReadOnlyJiraClient:
             issue_type=fields["issuetype"]["name"],
             description=ADFNode.model_validate(description) if description else None,
             comments=self._get_all_comments(key),
+            issue_links=sorted(issue_links, key=lambda link: (link.key, link.relation)),
         )
 
     def _issue_url(self, key: str) -> str:
