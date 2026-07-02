@@ -3,7 +3,7 @@ project: Jira & Confluence Context Skills
 version: 1
 status: draft
 created: 2026-07-01
-updated: 2026-07-01
+updated: 2026-07-02
 prd_version: 1
 main_goal: low-complexity
 top_blocker: capacity
@@ -47,6 +47,7 @@ valuable.
 | S-03 | extract-ticket-links           | extract Jira keys and Confluence links from a document             | —                | FR-004, US-01         | ready    |
 | S-04 | assemble-one-hop-context       | assemble one-hop ticket context to Markdown file(s), gaps reported | S-01, S-02, S-03 | FR-005, FR-006, FR-008, US-01 | proposed |
 | S-05 | load-context-into-claude       | load the assembled one-hop context into a Claude conversation      | S-04             | FR-007, US-01         | proposed |
+| S-06 | extract-ticket-hierarchy       | see a ticket's parent and child work items alongside its links     | S-03             | — (not yet in PRD)    | proposed |
 
 ## Streams
 
@@ -55,7 +56,7 @@ Navigation aid — groups items that share a Prerequisites chain. Canonical orde
 | Stream | Theme                | Chain                     | Note                                                                                   |
 | ------ | --------------------- | -------------------------- | --------------------------------------------------------------------------------------- |
 | A      | Retrieval primitives  | `F-01` → `S-01` / `S-02`   | Both fetch primitives are auth-gated and independent of each other — build in parallel. |
-| B      | Link extraction       | `S-03`                     | No foundation prerequisite; pure parsing utility, buildable and testable in isolation.   |
+| B      | Link extraction       | `S-03` → `S-06`            | No foundation prerequisite; pure parsing utility, buildable and testable in isolation. `S-06` extends `S-03`'s result shape. |
 | C      | Assembly & delivery   | `S-04` → `S-05`            | Joins Stream A at `S-01`/`S-02` and Stream B at `S-03`; this is the north star chain.    |
 
 ## Baseline
@@ -152,6 +153,19 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Risk:** don't over-build a chunking scheme speculatively — the capacity budget is scarce and this NFR gap is explicitly deferred in the PRD.
 - **Status:** proposed
 
+### S-06: Extract ticket hierarchy (parent + child work items)
+
+- **Outcome:** user can see a ticket's parent ticket and child work items alongside the Jira keys, issue links, and Confluence pages `extract-ticket-links` (S-03) already surfaces.
+- **Change ID:** extract-ticket-hierarchy (not yet created)
+- **PRD refs:** — not yet covered by the PRD; raised directly by the user after S-03 shipped. Needs a PRD update (new FR) before this is plannable.
+- **Prerequisites:** S-03 (extends its result shape)
+- **Parallel with:** S-04, S-05 (once unblocked)
+- **Blockers:** scope decision below
+- **Unknowns:**
+  - Scope of "child work items" — `fields.subtasks` is inline on the issue response, same shape as `fields.parent`/`fields.issuelinks` (no extra API call, a pure additive fetch). Epic children, by contrast, are *not* inlined on the issue and would need a separate JQL search call per ticket — a materially bigger change (extra network round-trip, still read-only). Owner: user. Block: yes — this must be resolved before `/10x-plan` can scope the change.
+- **Risk:** if scope includes Epic children, this stops being a "free" additive fetch like `issuelinks` and becomes a second network call per ticket — worth resolving the scope question first rather than discovering it mid-plan.
+- **Status:** proposed
+
 ## Backlog Handoff
 
 | Roadmap ID | Change ID               | Suggested issue title                                          | Ready for `/10x-plan` | Notes                                    |
@@ -162,6 +176,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 | S-03       | extract-ticket-links     | Extract Jira keys / Confluence links from a document              | yes                    | Run `/10x-plan extract-ticket-links`     |
 | S-04       | assemble-one-hop-context | Assemble one-hop ticket context to Markdown files                 | no                     | Blocked on S-01, S-02, S-03 (north star)  |
 | S-05       | load-context-into-claude | Load assembled context into a Claude conversation                 | no                     | Blocked on S-04                          |
+| S-06       | extract-ticket-hierarchy | Extract a ticket's parent + child work items                      | no                     | Blocked on scope decision (subtasks-only vs. + Epic children) and a PRD update |
 
 ## Open Roadmap Questions
 
@@ -169,6 +184,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 2. **Macro/panel/embed fidelity** — Confluence macros/panels/embeds may be dropped by basic ADF→Markdown conversion. Owner: user. Block: S-02 (not blocking — accepted v1 tradeoff; fidelity gap should stay visible to the user).
 3. **Context-window overflow** — large assembled context may exceed Claude's context window when loaded live. Owner: user. Block: S-05 (not blocking — deferred; chunking strategy unresolved).
 4. **Link relevance filtering** — link-type weighting / dropping low-signal "relates to" links is out of scope for v1. Owner: user. Block: S-04 (not blocking — deferred to v2).
+5. **Ticket hierarchy scope** — should S-06 cover subtasks only (inline on the issue, free) or also Epic children (needs a separate JQL search call per ticket)? Owner: user. Block: S-06 (blocking — must be resolved before `/10x-plan extract-ticket-hierarchy`).
 
 ## Parked
 
