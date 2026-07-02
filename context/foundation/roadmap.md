@@ -27,11 +27,14 @@ reasoning itself.
 
 ## North star
 
-**S-04: User can assemble one-hop context for a ticket, written to Markdown
-files** — this is the PRD's Primary Success Criterion verbatim ("run this once
-and walk away with the full one-hop context of a ticket in clean Markdown"): the
-smallest end-to-end slice that proves assembling scattered context is actually
-valuable.
+**S-04: User can assemble one-hop ticket context as a Claude skill, loaded
+into the conversation with an optional saved Markdown report** — this is the
+PRD's Primary Success Criterion ("run this once and walk away with the full
+one-hop context of a ticket in clean Markdown"), now delivered as a single
+skill: the smallest end-to-end slice that proves assembling scattered context
+is actually valuable. (Originally split into S-04 assemble + S-05 load; merged
+into one slice once the design settled on a skill that does both in one run —
+see S-04 below.)
 
 > The **north star** here means: the smallest end-to-end slice whose successful
 > delivery would prove the core product hypothesis. It's placed as early as its
@@ -45,8 +48,7 @@ valuable.
 | S-01 | fetch-jira-ticket              | fetch a single Jira ticket by key as clean Markdown                | F-01             | FR-001, FR-003, US-01 | proposed |
 | S-02 | fetch-confluence-page          | fetch a single Confluence page by ID/URL as clean Markdown         | F-01             | FR-002, FR-003, US-01 | proposed |
 | S-03 | extract-ticket-links           | extract Jira keys and Confluence links from a document             | —                | FR-004, US-01         | ready    |
-| S-04 | assemble-one-hop-context       | assemble one-hop ticket context to Markdown file(s), gaps reported | S-01, S-02, S-03 | FR-005, FR-006, FR-008, US-01 | proposed |
-| S-05 | load-context-into-claude       | load the assembled one-hop context into a Claude conversation      | S-04             | FR-007, US-01         | proposed |
+| S-04 | assemble-ticket-context        | assemble one-hop ticket context via a Claude skill, loaded into conversation with optional saved report, gaps reported | S-01, S-02, S-03 | FR-005, FR-006, FR-007, FR-008, US-01 | proposed |
 | S-06 | extract-ticket-hierarchy       | see a ticket's parent and child work items alongside its links     | S-03             | — (not yet in PRD)    | proposed |
 
 ## Streams
@@ -57,7 +59,7 @@ Navigation aid — groups items that share a Prerequisites chain. Canonical orde
 | ------ | --------------------- | -------------------------- | --------------------------------------------------------------------------------------- |
 | A      | Retrieval primitives  | `F-01` → `S-01` / `S-02`   | Both fetch primitives are auth-gated and independent of each other — build in parallel. |
 | B      | Link extraction       | `S-03` → `S-06`            | No foundation prerequisite; pure parsing utility, buildable and testable in isolation. `S-06` extends `S-03`'s result shape. |
-| C      | Assembly & delivery   | `S-04` → `S-05`            | Joins Stream A at `S-01`/`S-02` and Stream B at `S-03`; this is the north star chain.    |
+| C      | Assembly & delivery   | `S-04`                     | Joins Stream A at `S-01`/`S-02` and Stream B at `S-03`; this is the north star chain. `S-04` alone now covers both assembly and loading into a conversation (originally two slices, merged — see S-04). |
 
 ## Baseline
 
@@ -127,30 +129,19 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Risk:** missing prose-only mentions is an accepted v1 gap, not a defect — building fuzzy detection now would spend scarce after-hours capacity on a nice-to-have.
 - **Status:** ready
 
-### S-04: Assemble one-hop context to Markdown files
+### S-04: Assemble one-hop ticket context as a Claude skill
 
-- **Outcome:** user can assemble one-hop context for a ticket — fetch the target, extract its links, fetch every directly-linked ticket and referenced Confluence page, convert everything to Markdown, and get it written to Markdown file(s) on disk, with any inaccessible/forbidden/deleted links reported rather than failing the run.
-- **Change ID:** assemble-one-hop-context
-- **PRD refs:** FR-005, FR-006, FR-008, US-01
+- **Outcome:** user runs a Claude skill for a ticket — it fetches the target ticket in full, extracts its links, dispatches one subagent per directly-linked ticket/referenced Confluence page to fetch (via the S-01/S-02 primitives) and condense it from the target ticket's perspective, then loads the target's full content plus the condensed findings into the conversation as a high-level summary. Any inaccessible/forbidden/deleted link is reported as a gap rather than failing the run. The user can then keep chatting or ask to save a Markdown report of the condensed synthesis.
+- **Change ID:** assemble-ticket-context
+- **PRD refs:** FR-005, FR-006, FR-007, FR-008, US-01
 - **Prerequisites:** S-01, S-02, S-03
 - **Parallel with:** —
 - **Blockers:** —
+- **Merged from:** originally two slices — `assemble-one-hop-context` (mechanical fetch + write-to-files) and `load-context-into-claude` (load files into a conversation). Brainstorming settled on one skill that does both in a single run, using subagent condensation as the answer to the context-window-overflow question below — see PRD FR-005–FR-007 and the (now resolved) Open Question #3.
 - **Unknowns:**
   - Link-relevance filtering (weighting link types, dropping low-signal "relates to" links) is out of scope here. Owner: user. Block: no (PRD explicitly defers to v2; Open Question #4 — v1 fetches everything one hop out).
-- **Risk:** this is the slice that actually proves the core hypothesis — treating an inaccessible/forbidden/deleted link as a reported gap rather than a crash (the graceful-degradation guardrail) matters as much as the happy path.
-- **Status:** proposed
-
-### S-05: Load assembled context into a Claude conversation
-
-- **Outcome:** user can load the assembled one-hop context directly into a Claude conversation for analysis and Q&A, as an alternative (or complement) to reading the Markdown files.
-- **Change ID:** load-context-into-claude
-- **PRD refs:** FR-007, US-01
-- **Prerequisites:** S-04
-- **Parallel with:** —
-- **Blockers:** —
-- **Unknowns:**
-  - Context-window overflow — a large assembled corpus may exceed Claude's context window with no chunking/summarization strategy decided. Owner: user. Block: no (PRD defers this; ship the simplest "load it all" version first and let real usage show whether truncation is actually needed — Open Question #3).
-- **Risk:** don't over-build a chunking scheme speculatively — the capacity budget is scarce and this NFR gap is explicitly deferred in the PRD.
+  - ~~Context-window overflow — a large assembled corpus may exceed Claude's context window with no chunking/summarization strategy decided.~~ Resolved by the merge: per-item subagent condensation keeps only summarized findings (not raw fetched content) in the main conversation.
+- **Risk:** this is the slice that actually proves the core hypothesis — treating an inaccessible/forbidden/deleted link as a reported gap rather than a crash (the graceful-degradation guardrail) matters as much as the happy path. The condensation step also means re-running assembly is no longer byte-reproducible (LLM-authored synthesis) — acceptable per the PRD's NFR update, but worth remembering when comparing two runs of the same ticket.
 - **Status:** proposed
 
 ### S-06: Extract ticket hierarchy (parent + child work items)
@@ -159,7 +150,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Change ID:** extract-ticket-hierarchy (not yet created)
 - **PRD refs:** — not yet covered by the PRD; raised directly by the user after S-03 shipped. Needs a PRD update (new FR) before this is plannable.
 - **Prerequisites:** S-03 (extends its result shape)
-- **Parallel with:** S-04, S-05 (once unblocked)
+- **Parallel with:** S-04 (once unblocked)
 - **Blockers:** scope decision below
 - **Unknowns:**
   - Scope of "child work items" — `fields.subtasks` is inline on the issue response, same shape as `fields.parent`/`fields.issuelinks` (no extra API call, a pure additive fetch). Epic children, by contrast, are *not* inlined on the issue and would need a separate JQL search call per ticket — a materially bigger change (extra network round-trip, still read-only). Owner: user. Block: yes — this must be resolved before `/10x-plan` can scope the change.
@@ -174,21 +165,20 @@ Foundations below assume these are present and do NOT re-scaffold them.
 | S-01       | fetch-jira-ticket        | Fetch a single Jira ticket as Markdown                            | no                     | Blocked on F-01                          |
 | S-02       | fetch-confluence-page    | Fetch a single Confluence page as Markdown                        | no                     | Blocked on F-01                          |
 | S-03       | extract-ticket-links     | Extract Jira keys / Confluence links from a document              | yes                    | Run `/10x-plan extract-ticket-links`     |
-| S-04       | assemble-one-hop-context | Assemble one-hop ticket context to Markdown files                 | no                     | Blocked on S-01, S-02, S-03 (north star)  |
-| S-05       | load-context-into-claude | Load assembled context into a Claude conversation                 | no                     | Blocked on S-04                          |
+| S-04       | assemble-ticket-context  | Assemble one-hop ticket context as a Claude skill (loaded into conversation, optional saved report) | no | Blocked on S-01, S-02, S-03 (north star); merges former S-04 + S-05 |
 | S-06       | extract-ticket-hierarchy | Extract a ticket's parent + child work items                      | no                     | Blocked on scope decision (subtasks-only vs. + Epic children) and a PRD update |
 
 ## Open Roadmap Questions
 
 1. **Prose references without explicit links** ("see the auth epic") are not captured by FR-004's explicit-link extraction. Owner: user. Block: S-03 (not blocking — deferred to v2).
 2. **Macro/panel/embed fidelity** — Confluence macros/panels/embeds may be dropped by basic ADF→Markdown conversion. Owner: user. Block: S-02 (not blocking — accepted v1 tradeoff; fidelity gap should stay visible to the user).
-3. **Context-window overflow** — large assembled context may exceed Claude's context window when loaded live. Owner: user. Block: S-05 (not blocking — deferred; chunking strategy unresolved).
+3. **Context-window overflow** — ~~large assembled context may exceed Claude's context window when loaded live.~~ **Resolved**: S-04's per-item subagent condensation keeps only summarized findings, not raw fetched content, in the main conversation. Owner: user. Block: — (resolved, no longer blocking S-04).
 4. **Link relevance filtering** — link-type weighting / dropping low-signal "relates to" links is out of scope for v1. Owner: user. Block: S-04 (not blocking — deferred to v2).
 5. **Ticket hierarchy scope** — should S-06 cover subtasks only (inline on the issue, free) or also Epic children (needs a separate JQL search call per ticket)? Owner: user. Block: S-06 (blocking — must be resolved before `/10x-plan extract-ticket-hierarchy`).
 
 ## Parked
 
-- **Research helper skill (FR-009)** — Why parked: PRD marks it nice-to-have/droppable, and its own Socrates note calls it "largely generic LLM capability" rather than new mechanism. Combined with `main_goal: low-complexity` and the `capacity` blocker, it's deferred past the must-have path (F-01, S-01–S-05) rather than roadmapped as its own slice.
+- **Research helper skill (FR-009)** — Why parked: PRD marks it nice-to-have/droppable, and its own Socrates note calls it "largely generic LLM capability" rather than new mechanism. Combined with `main_goal: low-complexity` and the `capacity` blocker, it's deferred past the must-have path (F-01, S-01–S-04) rather than roadmapped as its own slice.
 - **No writing to Atlassian** — Why parked: locks the PRD's stated scope and the read-only guardrail; strictly out of scope, not a v2 candidate.
 - **No multi-hop / recursive crawling** — Why parked: v1 follows links exactly one hop; keeps the build weekend-sized. Multi-hop is a v2 concern.
 - **No relevance filtering or ranking** — Why parked: v1 fetches all one-hop items unfiltered and lets the human/LLM judge relevance. Scoring is a v2 concern.
