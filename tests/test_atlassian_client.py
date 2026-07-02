@@ -183,6 +183,33 @@ def test_get_ticket_collects_comments_across_multiple_pages() -> None:
 
 
 @responses.activate
+def test_get_ticket_raises_on_incomplete_comment_page() -> None:
+    responses.add(
+        responses.GET,
+        JIRA_ISSUE_URL,
+        json={
+            "key": "PROJ-1",
+            "fields": {
+                "summary": "Something is broken",
+                "status": {"name": "In Progress"},
+                "issuetype": {"name": "Bug"},
+                "description": None,
+            },
+        },
+        status=200,
+    )
+    responses.add(
+        responses.GET,
+        JIRA_COMMENTS_URL,
+        json={"startAt": 0, "maxResults": 50, "total": 3, "comments": []},
+        status=200,
+    )
+
+    with pytest.raises(ValueError, match="incomplete page"):
+        ReadOnlyJiraClient(_config()).get_ticket("PROJ-1")
+
+
+@responses.activate
 def test_get_ticket_raises_on_not_found() -> None:
     responses.add(responses.GET, JIRA_ISSUE_URL, json={"message": "Not Found"}, status=404)
 

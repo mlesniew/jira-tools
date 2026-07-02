@@ -1,7 +1,6 @@
 from collections.abc import Callable
 
 import typer
-from requests.exceptions import HTTPError
 
 from jira_tools.atlassian_client import (
     IdentityCheckResult,
@@ -59,7 +58,7 @@ def fetch_ticket(key: str) -> None:
 
     try:
         ticket = ReadOnlyJiraClient(config).get_ticket(key)
-    except HTTPError:
+    except Exception:
         typer.echo(f"Could not fetch ticket {key}: not found or not accessible.", err=True)
         raise typer.Exit(code=1) from None
 

@@ -125,6 +125,20 @@ def test_hard_break_converts_to_markdown_line_break_not_raw_html() -> None:
     assert "Line one  \nLine two" in markdown
 
 
+def test_hard_break_conversion_does_not_corrupt_literal_br_in_code() -> None:
+    node = _doc(
+        {
+            "type": "codeBlock",
+            "attrs": {"language": "html"},
+            "content": [{"type": "text", "text": "<p>line one<br>line two</p>"}],
+        }
+    )
+
+    markdown = to_markdown(node)
+
+    assert "<p>line one<br>line two</p>" in markdown
+
+
 def test_panel_degrades_gracefully_without_raising() -> None:
     node = _doc(
         {

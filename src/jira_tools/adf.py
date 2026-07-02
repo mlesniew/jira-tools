@@ -6,8 +6,12 @@ validated ADF node tree into a readable Markdown string via `marklas`.
 
 from __future__ import annotations
 
+import re
+
 import marklas
 from pydantic import BaseModel
+
+_CODE_SEGMENT = re.compile(r"(```.*?```|`[^`\n]*`)", re.DOTALL)
 
 
 class ADFNode(BaseModel):
@@ -26,5 +30,11 @@ def to_markdown(node: ADFNode) -> str:
     # marklas always renders ADF hardBreak nodes as literal `<br>` (a
     # deliberate choice for markdown round-trip fidelity, not affected by
     # plain=True) rather than a CommonMark hard line break. Convert it so
-    # plain-text output reads as a normal line break instead of raw HTML.
-    return markdown.replace("<br>", "  \n")
+    # plain-text output reads as a normal line break instead of raw HTML,
+    # but skip fenced code blocks and inline code spans so a literal `<br>`
+    # pasted inside code isn't corrupted.
+    segments = _CODE_SEGMENT.split(markdown)
+    return "".join(
+        segment if i % 2 == 1 else segment.replace("<br>", "  \n")
+        for i, segment in enumerate(segments)
+    )

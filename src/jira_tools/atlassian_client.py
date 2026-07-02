@@ -94,7 +94,10 @@ class ReadOnlyJiraClient:
             if not isinstance(page, dict):
                 raise ValueError("Comment endpoint returned an unexpected response")
             total = page["total"]
-            for raw_comment in page["comments"]:
+            raw_comments = page["comments"]
+            if not raw_comments and len(comments) < total:
+                raise ValueError("Comment endpoint returned an incomplete page")
+            for raw_comment in raw_comments:
                 comments.append(
                     JiraComment(
                         author=raw_comment["author"]["displayName"],

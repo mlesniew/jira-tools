@@ -58,6 +58,13 @@ UI.
   hard-coded in `tests/test_atlassian_client.py`. Ticket and comment
   endpoints are therefore `rest/api/2/issue/{key}` and
   `rest/api/2/issue/{key}/comment`.
+  - **Addendum (post-close-out, commit `6a1f5ce`)**: this v2 resolution was
+    superseded — API v2 returns description/comment bodies as plain
+    wiki-markup strings, not ADF, which breaks `ADFNode` validation on any
+    ticket with real content. `get_ticket()`/`_get_all_comments()` now force
+    API v3 via `resource_url('issue', api_version='3')`, so the actual
+    endpoints are `rest/api/3/issue/{key}` and
+    `rest/api/3/issue/{key}/comment`.
 - Verified directly (source inspection): `Jira.issue_get_comments()` performs
   a single unparameterized `self.get(url)` call — no pagination support.
   Manual pagination must use `self._client.get(url, params={...})` directly.
