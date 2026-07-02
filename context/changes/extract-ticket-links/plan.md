@@ -383,17 +383,17 @@ sites need no changes; adding it is additive.
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `uv run mypy`
-- [x] 1.2 Linting passes: `uv run ruff check .`
-- [x] 1.3 Unit tests pass: `uv run pytest tests/test_atlassian_client.py`
+- [x] 1.1 Type checking passes: `uv run mypy` — cd88898
+- [x] 1.2 Linting passes: `uv run ruff check .` — cd88898
+- [x] 1.3 Unit tests pass: `uv run pytest tests/test_atlassian_client.py` — cd88898
 
 ### Phase 2: Link extraction module
 
 #### Automated
 
-- [ ] 2.1 Type checking passes: `uv run mypy`
-- [ ] 2.2 Linting passes: `uv run ruff check .`
-- [ ] 2.3 Unit tests pass: `uv run pytest tests/test_link_extraction.py`
+- [x] 2.1 Type checking passes: `uv run mypy`
+- [x] 2.2 Linting passes: `uv run ruff check .`
+- [x] 2.3 Unit tests pass: `uv run pytest tests/test_link_extraction.py`
 
 ### Phase 3: Markdown summary + CLI wiring
 
