@@ -75,6 +75,24 @@ through the config file, verifies credentials with `auth-check`, then runs
    Safe to re-run; it's idempotent and preserves any notes you've added
    outside the `jira-tools` markers.
 
+## Scope & distribution
+
+This repo *is* the package — a single source of truth the team pulls with
+`git clone` plus `install.py`, rather than a published npm/PyPI package. For
+a small team already on GitHub, a clone is enough; a package registry
+(versioned publishing, read tokens, private access control) would be more
+machinery than this audience needs. A few boundaries are deliberate:
+
+- **Versioning** is done with git tags, starting at `v1.0.0`. `git tag` is
+  the release list, and each tag is a fixed point teammates can pin a clone
+  to.
+- **Claude Code only.** That's the tool the team uses. The skill format
+  (`SKILL.md`) is portable, so a Cursor/Codex target would be a later
+  tool-profile addition to `install.py`, not a rewrite.
+- **No uninstall yet.** MVP scope. `install.py` is idempotent, so re-running
+  it to update or repair an install is safe; a manifest-based uninstall can
+  follow if the toolkit grows.
+
 ## Development
 
 ```

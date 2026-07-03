@@ -8,3 +8,6 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Course lesson source — kept local, never published
+lesson.md
