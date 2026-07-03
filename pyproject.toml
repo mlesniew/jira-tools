@@ -31,7 +31,7 @@ dev = [
 
 [tool.mypy]
 strict = true
-files = ["src", "tests"]
+files = ["src", "tests", "install.py"]
 
 [tool.ruff]
 line-length = 100
@@ -42,3 +42,4 @@ select = ["E", "F", "I", "UP", "B"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]

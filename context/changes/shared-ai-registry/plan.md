@@ -448,11 +448,11 @@ same dev machine covers dogfooding. No data migration.
 
 #### Automated
 
-- [x] 1.1 Skill exists at new path: `test -f skills/assemble-ticket-context/SKILL.md`
-- [x] 1.2 Old skill path is gone: `test ! -d .claude/skills/assemble-ticket-context`
-- [x] 1.3 No stale "this repo's" narration: `! grep -rn "this repo's jira-tools" skills/`
-- [x] 1.4 `installation-steps` names the config field `api_token`, no bullet uses bare `token`: `grep -q "api_token" installation-steps && ! grep -qE '^\s*\*\s*token\b' installation-steps`
-- [x] 1.5 Type/lint/tests still pass: `uv run mypy`, `uv run ruff check .`, `uv run pytest`
+- [x] 1.1 Skill exists at new path: `test -f skills/assemble-ticket-context/SKILL.md` — abfdf31
+- [x] 1.2 Old skill path is gone: `test ! -d .claude/skills/assemble-ticket-context` — abfdf31
+- [x] 1.3 No stale "this repo's" narration: `! grep -rn "this repo's jira-tools" skills/` — abfdf31
+- [x] 1.4 `installation-steps` names the config field `api_token`, no bullet uses bare `token`: `grep -q "api_token" installation-steps && ! grep -qE '^\s*\*\s*token\b' installation-steps` — abfdf31
+- [x] 1.5 Type/lint/tests still pass: `uv run mypy`, `uv run ruff check .`, `uv run pytest` — abfdf31
 
 #### Manual
 
@@ -464,12 +464,12 @@ same dev machine covers dogfooding. No data migration.
 
 #### Automated
 
-- [ ] 2.1 Installer tests pass: `uv run pytest tests/test_install.py`
-- [ ] 2.2 Full suite passes: `uv run pytest`
-- [ ] 2.3 Type checking passes: `uv run mypy`
-- [ ] 2.4 Linting passes: `uv run ruff check .`
-- [ ] 2.5 Idempotency asserted in tests (injection + skill copy)
-- [ ] 2.6 `rules/jira-tools.md` contains no sentinel markers
+- [x] 2.1 Installer tests pass: `uv run pytest tests/test_install.py`
+- [x] 2.2 Full suite passes: `uv run pytest`
+- [x] 2.3 Type checking passes: `uv run mypy`
+- [x] 2.4 Linting passes: `uv run ruff check .`
+- [x] 2.5 Idempotency asserted in tests (injection + skill copy)
+- [x] 2.6 `rules/jira-tools.md` contains no sentinel markers
 
 #### Manual
 
