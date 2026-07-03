@@ -29,14 +29,7 @@ in it.
 Clone the repo, then paste this prompt into Claude Code:
 
 ```
-Clone this repo if you haven't already:
-git clone git@github.com:mlesniew/jira-tools.git
-
-Follow the steps in `installation-steps.md` to set me up with jira-tools:
-install uv if needed, run `uv tool install .`, help me create
-~/.config/jira-tools/config.toml, and verify with `jira-tools auth-check`.
-Then run `uv run python install.py` to install the skills and global
-instructions.
+Follow the steps in `installation-steps.md` to set me up with jira-tools.
 ```
 
 The agent installs uv (if missing), runs `uv tool install .`, walks you
