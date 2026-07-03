@@ -1,6 +1,6 @@
 ---
 name: assemble-ticket-context
-description: Assemble the full one-hop context for a Jira ticket — the ticket itself plus every directly-linked ticket and referenced Confluence page — using this repo's jira-tools CLI, condense each linked item from the target ticket's perspective via subagents, and present a summary before offering to save a report. Use when the user gives a Jira ticket key and wants to prep for a planning/refinement/design meeting, or asks to "load context for <KEY>", "assemble context for <KEY>", "prep me for <KEY>", "what's the context on <KEY>".
+description: Assemble the full one-hop context for a Jira ticket — the ticket itself plus every directly-linked ticket and referenced Confluence page — using the globally-installed jira-tools CLI, condense each linked item from the target ticket's perspective via subagents, and present a summary before offering to save a report. Use when the user gives a Jira ticket key and wants to prep for a planning/refinement/design meeting, or asks to "load context for <KEY>", "assemble context for <KEY>", "prep me for <KEY>", "what's the context on <KEY>".
 allowed-tools:
   - Read
   - Bash
@@ -18,10 +18,10 @@ in full, fetch its one-hop links via per-item subagents that condense from
 the target ticket's perspective, present a summary, then let the user decide
 what happens next.
 
-This skill only ever calls the existing `jira-tools` CLI (`fetch-ticket`,
-`fetch-page`, `extract-links`) — it never talks to Jira/Confluence directly,
-and never writes to Atlassian (read-only guardrail, enforced in the CLI
-layer already).
+This skill only ever calls the globally-installed `jira-tools` CLI
+(`fetch-ticket`, `fetch-page`, `extract-links`) — it never talks to
+Jira/Confluence directly, and never writes to Atlassian (read-only
+guardrail, enforced in the CLI layer already).
 
 ## Input
 

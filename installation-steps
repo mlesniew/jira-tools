@@ -1,0 +1,16 @@
+1. Make sure uv is installed and can be run directly.
+  a. If it is installed, continue to the next step
+  b. If it is not installed, offer automatic installation using AskUserQuestion
+  c. If the user decides to install uv following documentation at https://raw.githubusercontent.com/astral-sh/uv/refs/heads/main/docs/getting-started/installation.md
+2. Install the jira-tools CLI tool itself.  Run `uv tool install .` in the project directory.  Next make sure the tool can be run -- verify by running `jira-tools version` from the home directory.
+3. Guide the user through configuration.  We need to create ~/.config/jira-tools/config.toml.
+  a. If the file exists, pause and ask the user what to do
+  b. The config file needs to have three entries, ask for them one by one:
+    * site_url -- it's the atlassian site URL the user uses, typically it looks like http://acme.atlassian.net
+    * email -- the user's email address (assigned to the Atlassian account)
+    * api_token -- an access token -- instruct the user to get one at https://id.atlassian.com/manage-profile/security/api-tokens -- note that they need to chose "Create API Token", not "Create API token with scopes"
+  c. With the file configured, attempt to use the tool -- run `jira-tools auth-check`
+    * if it fails, offer to go back and correct settings or let the user correct them by himself
+    * if it succeeds, ask for confirmation that the output is correct (the whoiam info printed by the tool)
+  d. The config path is XDG-aware ($XDG_CONFIG_HOME/jira-tools/config.toml, falling back to ~/.config/jira-tools/config.toml if XDG_CONFIG_HOME is unset).
+4. Run `uv run python install.py` from the clone. This installs the skill files into ~/.claude/skills and injects jira-tools usage instructions into ~/.claude/CLAUDE.md.
