@@ -40,8 +40,11 @@ jira-tools auth-check
 
 If this fails for any reason — a non-zero exit with `PASS`/`FAIL` output for
 Jira and/or Confluence, or the command/binary not being found at all (e.g.
-`jira-tools` isn't on `PATH`) — stop immediately and relay whatever output or
-error the shell produced as the reason context assembly can't proceed. Do
+`jira-tools` isn't on `PATH`) — stop immediately and relay the PASS/FAIL
+lines as the reason context assembly can't proceed. If a FAIL reason is
+more than a short error phrase (e.g. it contains raw HTTP/network detail
+from the underlying client), summarize it in your own words rather than
+pasting it verbatim — it may echo more of the request than intended. Do
 not attempt Step 1, do not retry, and do not cache the result across runs —
 this check always runs fresh at the start of every invocation.
 
@@ -109,12 +112,12 @@ Non-Goal: no multi-hop / recursive crawling).
 
 ### 3. Dispatch one subagent per linked item, in parallel
 
-For every item in the dispatch list, spawn a `general-purpose`-type subagent
-— this is "run a command and synthesize from a given perspective" work,
-matching the convention used elsewhere in this repo. `general-purpose` has
-full tool access, including Edit/Write, so the read-only guarantee here
-comes from the prompt, not the tool set — see the explicit instruction
-below. Send all of a batch's subagent calls in one message so they run in
+For every item in the dispatch list, spawn an `Explore`-type subagent —
+Step 3's job is entirely read + reason (run one fetch command, read its
+output, return a condensed judgment), which is exactly what `Explore`
+grants (Bash, Read, reasoning) while structurally excluding Edit/Write, so
+the read-only guarantee holds at the tool level rather than the prompt
+level. Send all of a batch's subagent calls in one message so they run in
 parallel.
 
 Each subagent's prompt should include:
@@ -130,9 +133,6 @@ Each subagent's prompt should include:
   Jira ticket, or `jira-tools fetch-page <page-id>` for a Confluence page.
 - An explicit instruction **not** to follow any further links it finds in
   the fetched content — one hop only, no recursion.
-- An explicit instruction that the subagent is strictly read-only and
-  must not create, write, or edit any file — it may only run the given
-  fetch command and report its findings back in its response.
 - What to return: a condensed, ticket-focused note — not the raw fetched
   content. Roughly:
   - one line: what this item is (title/summary),
@@ -172,7 +172,9 @@ Offer two options, plainly:
 - **Save a detailed report** to a Markdown file.
 
 If the user asks for the report, confirm or ask for a destination path
-(default: `<KEY>-context.md` in the current directory) before writing it.
+(default: `<KEY>-context.md` in the current directory) before writing it. If
+a file already exists at that path, say so and ask the user to confirm
+overwrite or give a different path — don't write over it silently.
 The report is the **condensed synthesis** — organized by linked item, with
 a Gaps section — not a raw dump of every fetched document (per the PRD's
 FR-006). Stamp it with the target ticket's key and the fetch timestamp so

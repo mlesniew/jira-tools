@@ -386,7 +386,7 @@ None — no data model, config format, or persisted state changes.
 
 #### Automated
 
-- [x] 2.1 `Explore` absent and `general-purpose` present (type actually replaced) — 5d114f8
+- [x] 2.1 `Explore` absent and `general-purpose` present (type actually replaced) — 5d114f8 — **superseded, see Addenda**
 - [x] 2.2 Distinctive read-only instruction phrase present in Step 3 — 5d114f8
 - [x] 2.3 Step 6 template renders the conditional no-relation heading form — 5d114f8
 
@@ -396,3 +396,28 @@ None — no data model, config format, or persisted state changes.
 - [ ] 2.5 Step 3 includes relation free-text and gap-message fidelity caveats
 - [ ] 2.6 End-to-end run renders both heading forms correctly with accurate titles
 - [ ] 2.7 Dispatched subagent transcript shows no Write/Edit tool call
+
+## Addenda
+
+### 2026-07-03 — Step 3 subagent type reverted to `Explore` (impl-review F1)
+
+`context/changes/assemble-ticket-context/reviews/impl-review.md` (F1) found
+this plan's Change 1 rationale ("`general-purpose` matches this repo's
+convention for run + synthesize work") doesn't hold up: checked against the
+actual cited sibling skills (`10x-research/SKILL.md`, `10x-frame/SKILL.md`),
+their real split is `Explore` = structural search vs. `general-purpose` =
+judgment/reasoning over what's found — not read-only-vs-write. Step 3's job
+(run one fetch command, read the output, return a condensed judgment) needs
+nothing `general-purpose` grants beyond what `Explore` already has (Bash,
+Read, reasoning). Since Step 3's dispatched subagents read untrusted
+ticket/Confluence content, and CLAUDE.md names "strictly read-only" as an
+explicit guardrail, the structural guarantee `Explore` provides was judged
+worth more than the prompt-level one `general-purpose` required.
+
+**Resolution**: Step 3's dispatch was reverted to `Explore`-type subagents;
+the now-redundant "must not create, write, or edit any file" prompt
+instruction was removed (enforced structurally instead). This supersedes
+Automated criterion 2.1 and Change 1's contract above — `Explore` is the
+correct, current state, not `general-purpose`. Manual criterion 2.7 ("no
+Write/Edit tool call in transcript") is unaffected in spirit but now trivially
+true by construction rather than needing transcript inspection.
