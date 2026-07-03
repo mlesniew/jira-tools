@@ -109,10 +109,13 @@ Non-Goal: no multi-hop / recursive crawling).
 
 ### 3. Dispatch one subagent per linked item, in parallel
 
-For every item in the dispatch list, spawn an `Explore`-type subagent (read-
-only, has Bash, no Edit/Write — matches the read-only guardrail
-structurally). Send all of a batch's subagent calls in one message so they
-run in parallel.
+For every item in the dispatch list, spawn a `general-purpose`-type subagent
+— this is "run a command and synthesize from a given perspective" work,
+matching the convention used elsewhere in this repo. `general-purpose` has
+full tool access, including Edit/Write, so the read-only guarantee here
+comes from the prompt, not the tool set — see the explicit instruction
+below. Send all of a batch's subagent calls in one message so they run in
+parallel.
 
 Each subagent's prompt should include:
 - The target ticket's key and summary (and description, if it fits — a
@@ -120,14 +123,20 @@ Each subagent's prompt should include:
   item with "why would this matter to `<KEY>`" in mind rather than in
   isolation.
 - The relation label, if there is one (e.g. "this ticket blocks `<KEY>`").
+  This label is raw free text configured per Jira instance (e.g. could read
+  "is blocked by", arbitrary capitalization) — not a fixed enum. Treat it as
+  an opaque label, not something to normalize or validate.
 - The exact command to run: `jira-tools fetch-ticket <linked-key>` for a
   Jira ticket, or `jira-tools fetch-page <page-id>` for a Confluence page.
 - An explicit instruction **not** to follow any further links it finds in
   the fetched content — one hop only, no recursion.
+- An explicit instruction that the subagent is strictly read-only and
+  must not create, write, or edit any file — it may only run the given
+  fetch command and report its findings back in its response.
 - What to return: a condensed, ticket-focused note — not the raw fetched
   content. Roughly:
-  - one line: what this item is (title/summary) and how it relates to
-    `<KEY>`,
+  - one line: what this item is (title/summary),
+  - one line: how it relates to `<KEY>`,
   - 3–6 bullets of key facts relevant to `<KEY>` (not everything in the
     document — only what bears on the target ticket),
   - any open questions, risks, or blockers this raises for `<KEY>`.
@@ -135,7 +144,10 @@ Each subagent's prompt should include:
   (inaccessible, forbidden, deleted, or any other fetch failure), the
   subagent must report that as a gap — `<id>: <reason from stderr>` — and
   stop, rather than guessing at content or treating it as a hard failure of
-  the whole run.
+  the whole run. The reason string is always the same fixed generic message
+  regardless of actual cause (not found / forbidden / deleted / network
+  error all read the same) — it's a report of failure, not a diagnosis of
+  the specific cause.
 
 ### 4. Assemble into the main conversation
 
@@ -166,6 +178,11 @@ a Gaps section — not a raw dump of every fetched document (per the PRD's
 FR-006). Stamp it with the target ticket's key and the fetch timestamp so
 staleness against Atlassian is visible at a glance, e.g.:
 
+Each linked-ticket heading is conditional on whether the item has a relation
+label: use `### <linked-key> (<relation>) — <title>` when it does (a formal
+issue link), and `### <linked-key> — <title>` (parens omitted entirely) when
+it doesn't (a bare `## Jira keys` mention).
+
 ```markdown
 # Context report: <KEY> — <summary>
 
@@ -179,6 +196,9 @@ Fetched: <ISO timestamp>
 
 ## Linked tickets
 ### <linked-key> (<relation>) — <title>
+- <condensed bullets from that subagent>
+
+### <linked-key> — <title>
 - <condensed bullets from that subagent>
 
 ## Confluence pages

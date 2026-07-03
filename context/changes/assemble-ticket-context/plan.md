@@ -373,8 +373,8 @@ None — no data model, config format, or persisted state changes.
 
 #### Automated
 
-- [x] 1.1 Frontmatter parses as valid YAML with `allowed-tools` and `argument-hint`
-- [x] 1.2 Step 0 exists before Step 1 and contains `jira-tools auth-check`
+- [x] 1.1 Frontmatter parses as valid YAML with `allowed-tools` and `argument-hint` — c26efef
+- [x] 1.2 Step 0 exists before Step 1 and contains `jira-tools auth-check` — c26efef
 
 #### Manual
 
@@ -386,9 +386,9 @@ None — no data model, config format, or persisted state changes.
 
 #### Automated
 
-- [ ] 2.1 `Explore` absent and `general-purpose` present (type actually replaced)
-- [ ] 2.2 Distinctive read-only instruction phrase present in Step 3
-- [ ] 2.3 Step 6 template renders the conditional no-relation heading form
+- [x] 2.1 `Explore` absent and `general-purpose` present (type actually replaced)
+- [x] 2.2 Distinctive read-only instruction phrase present in Step 3
+- [x] 2.3 Step 6 template renders the conditional no-relation heading form
 
 #### Manual
 
