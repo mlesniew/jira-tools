@@ -386,9 +386,9 @@ None — no data model, config format, or persisted state changes.
 
 #### Automated
 
-- [x] 2.1 `Explore` absent and `general-purpose` present (type actually replaced)
-- [x] 2.2 Distinctive read-only instruction phrase present in Step 3
-- [x] 2.3 Step 6 template renders the conditional no-relation heading form
+- [x] 2.1 `Explore` absent and `general-purpose` present (type actually replaced) — 5d114f8
+- [x] 2.2 Distinctive read-only instruction phrase present in Step 3 — 5d114f8
+- [x] 2.3 Step 6 template renders the conditional no-relation heading form — 5d114f8
 
 #### Manual
 
