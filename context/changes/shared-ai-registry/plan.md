@@ -464,12 +464,12 @@ same dev machine covers dogfooding. No data migration.
 
 #### Automated
 
-- [x] 2.1 Installer tests pass: `uv run pytest tests/test_install.py`
-- [x] 2.2 Full suite passes: `uv run pytest`
-- [x] 2.3 Type checking passes: `uv run mypy`
-- [x] 2.4 Linting passes: `uv run ruff check .`
-- [x] 2.5 Idempotency asserted in tests (injection + skill copy)
-- [x] 2.6 `rules/jira-tools.md` contains no sentinel markers
+- [x] 2.1 Installer tests pass: `uv run pytest tests/test_install.py` — 1eb94a6
+- [x] 2.2 Full suite passes: `uv run pytest` — 1eb94a6
+- [x] 2.3 Type checking passes: `uv run mypy` — 1eb94a6
+- [x] 2.4 Linting passes: `uv run ruff check .` — 1eb94a6
+- [x] 2.5 Idempotency asserted in tests (injection + skill copy) — 1eb94a6
+- [x] 2.6 `rules/jira-tools.md` contains no sentinel markers — 1eb94a6
 
 #### Manual
 
@@ -482,9 +482,9 @@ same dev machine covers dogfooding. No data migration.
 
 #### Automated
 
-- [ ] 3.1 README references `install.py` and `api_token`
-- [ ] 3.2 README hard-codes the `mlesniew/jira-tools` clone URL
-- [ ] 3.3 No stale `token`-only config example in README
+- [x] 3.1 README references `install.py` and `api_token`
+- [x] 3.2 README hard-codes the `mlesniew/jira-tools` clone URL
+- [x] 3.3 No stale `token`-only config example in README
 
 #### Manual
 
