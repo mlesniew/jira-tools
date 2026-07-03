@@ -1,10 +1,28 @@
 # jira-tools
 
-Read-only CLI that assembles a Jira ticket's one-hop context — the ticket
-itself plus every directly-linked ticket and directly-referenced Confluence
-page — into clean Markdown, for meeting prep and Claude analysis. Includes
-the `assemble-ticket-context` Claude Code skill, which drives the CLI to
-build that context and summarize it for you.
+A growing library of reusable Claude Code **skills** for working with Jira
+and Confluence, plus the small **rules** and **CLI** that support them.
+
+The real value here isn't the CLI — it's the skills. Each one pairs the
+CLI's deterministic, read-only access to Jira and Confluence with an LLM's
+ability to synthesize and reason over what it fetches: the CLI guarantees
+you always get clean, accurate, credential-safe data; the skill decides
+what to do with it. That combination — reliable retrieval plus creative
+analysis — is where this repo earns its keep, more so than any single tool
+in it.
+
+- **Skills** (`skills/`) — the invokable workflows themselves. Today there's
+  one, `assemble-ticket-context` (pulls a Jira ticket's full one-hop context
+  — the ticket plus every directly-linked ticket and referenced Confluence
+  page — and summarizes it for meeting prep). It's meant to be the first of
+  a growing library, not the whole of it.
+- **Rules** (`rules/jira-tools.md`) — a short, always-on block of global
+  instructions, injected into `~/.claude/CLAUDE.md`, that teaches every
+  Claude Code session how to call the CLI correctly.
+- **CLI** (`src/jira_tools/`) — the deterministic engine underneath: a
+  read-only tool that fetches Jira tickets and Confluence pages as clean
+  Markdown. It's what the skills and rules are built on top of, not the
+  point of the repo on its own.
 
 ## Get started
 
@@ -14,7 +32,7 @@ Clone the repo, then paste this prompt into Claude Code:
 Clone this repo if you haven't already:
 git clone git@github.com:mlesniew/jira-tools.git
 
-Follow the steps in `installation-steps` to set me up with jira-tools:
+Follow the steps in `installation-steps.md` to set me up with jira-tools:
 install uv if needed, run `uv tool install .`, help me create
 ~/.config/jira-tools/config.toml, and verify with `jira-tools auth-check`.
 Then run `uv run python install.py` to install the skills and global

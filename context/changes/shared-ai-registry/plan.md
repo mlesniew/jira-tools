@@ -456,9 +456,9 @@ same dev machine covers dogfooding. No data migration.
 
 #### Manual
 
-- [ ] 1.6 Skill loads and runs from an arbitrary directory via the global install
-- [ ] 1.7 `installation-steps` reads correctly end-to-end as an agent checklist
-- [ ] 1.8 `lesson.md` / `vision` no longer present in the working tree
+- [x] 1.6 Skill loads and runs from an arbitrary directory via the global install
+- [x] 1.7 `installation-steps` reads correctly end-to-end as an agent checklist
+- [x] 1.8 `lesson.md` / `vision` no longer present in the working tree
 
 ### Phase 2: Usage block + `install.py` with tests
 
@@ -473,10 +473,10 @@ same dev machine covers dogfooding. No data migration.
 
 #### Manual
 
-- [ ] 2.7 `uv run python install.py` copies skill + injects block on a real machine
-- [ ] 2.8 Second run changes nothing (idempotent)
-- [ ] 2.9 Corrupted block (one marker) → refusal + no mangling
-- [ ] 2.10 Hand-edited notes outside the markers survive a re-run
+- [x] 2.7 `uv run python install.py` copies skill + injects block on a real machine
+- [x] 2.8 Second run changes nothing (idempotent)
+- [x] 2.9 Corrupted block (one marker) → refusal + no mangling
+- [x] 2.10 Hand-edited notes outside the markers survive a re-run
 
 ### Phase 3: User-facing README + bootstrap prompt
 
@@ -488,6 +488,6 @@ same dev machine covers dogfooding. No data migration.
 
 #### Manual
 
-- [ ] 3.4 A teammate can follow the README top-to-bottom to a working setup
-- [ ] 3.5 The bootstrap prompt drives full interactive setup without reading `installation-steps`
-- [ ] 3.6 Dev instructions still discoverable for contributors
+- [x] 3.4 A teammate can follow the README top-to-bottom to a working setup
+- [x] 3.5 The bootstrap prompt drives full interactive setup without reading `installation-steps`
+- [x] 3.6 Dev instructions still discoverable for contributors
