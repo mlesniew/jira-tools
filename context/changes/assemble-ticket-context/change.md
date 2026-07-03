@@ -1,7 +1,7 @@
 ---
 change_id: assemble-ticket-context
 title: Polish the assemble-ticket-context skill for standalone end-to-end use
-status: preparing
+status: implementing
 created: 2026-07-02
 updated: 2026-07-02
 archived_at: null

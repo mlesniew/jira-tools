@@ -1,6 +1,13 @@
 ---
 name: assemble-ticket-context
 description: Assemble the full one-hop context for a Jira ticket — the ticket itself plus every directly-linked ticket and referenced Confluence page — using this repo's jira-tools CLI, condense each linked item from the target ticket's perspective via subagents, and present a summary before offering to save a report. Use when the user gives a Jira ticket key and wants to prep for a planning/refinement/design meeting, or asks to "load context for <KEY>", "assemble context for <KEY>", "prep me for <KEY>", "what's the context on <KEY>".
+allowed-tools:
+  - Read
+  - Bash
+  - Task
+  - Write
+  - AskUserQuestion
+argument-hint: "<TICKET-KEY>"
 ---
 
 # Assemble ticket context
@@ -22,6 +29,23 @@ A single Jira ticket key, e.g. `PROJ-123`. If the user didn't give one, ask
 for it before doing anything else.
 
 ## Steps
+
+### 0. Verify jira-tools is configured
+
+Run:
+
+```
+jira-tools auth-check
+```
+
+If this fails for any reason — a non-zero exit with `PASS`/`FAIL` output for
+Jira and/or Confluence, or the command/binary not being found at all (e.g.
+`jira-tools` isn't on `PATH`) — stop immediately and relay whatever output or
+error the shell produced as the reason context assembly can't proceed. Do
+not attempt Step 1, do not retry, and do not cache the result across runs —
+this check always runs fresh at the start of every invocation.
+
+If it passes, continue silently to Step 1.
 
 ### 1. Fetch the target ticket in full
 
