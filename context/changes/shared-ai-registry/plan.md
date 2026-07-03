@@ -482,9 +482,9 @@ same dev machine covers dogfooding. No data migration.
 
 #### Automated
 
-- [x] 3.1 README references `install.py` and `api_token`
-- [x] 3.2 README hard-codes the `mlesniew/jira-tools` clone URL
-- [x] 3.3 No stale `token`-only config example in README
+- [x] 3.1 README references `install.py` and `api_token` — 1aebada
+- [x] 3.2 README hard-codes the `mlesniew/jira-tools` clone URL — 1aebada
+- [x] 3.3 No stale `token`-only config example in README — 1aebada
 
 #### Manual
 
